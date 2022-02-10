@@ -52,11 +52,6 @@ run_filter<-function(filter_list,filter_name,filter_value,threshold_direction,in
 		}
 	}
 	f_list<-f_list[lapply(f_list,length)>0] 
-	return(f_list)
-}
-
-plot_venn<-function(filter_list,infile,previous_markers_name,previous_markers){
-	f_list<-infile
 	name_filter<-name_filter[!is.na(name_filter)]
 	if(previous_markers_name!='none'){f_list[[length(f_list)+1]]<-(previous_markers)
 		name_filter<-c(name_filter,previous_markers_name)}
@@ -77,29 +72,20 @@ plot_venn<-function(filter_list,infile,previous_markers_name,previous_markers){
 	pdf(paste0(dir,'/venn',paste0(name_filter,collapse='_'),'.pdf'),width=10,height=10)
 	grid.draw(plot)
 	dev.off()
-}
-
-make_list<-function(infile){
-	f_list<-infile
 	int<-Reduce(intersect,f_list)
 	return(int)
 }
 
 #first venn (mapping quality filter)
 filter_list<-c('FS','SOR','MQ','MQRankSum','ReadPosRankSum')
-f_list1<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'none',NA)
-plot_venn1<-plot_venn(f_list1,info,'none',NA)
-int1<-make_list(f_list1)
+int1<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'none',NA)
 #second venn quality
 filter_list<-c('QUAL','QD')
-f_list2<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'int1',int1)
-plot_venn2<-plot_venn(f_list2,info,'int1',int1)
-int2<-make_list(f_list2)
+int2<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'int1',int1)
 #third venn allele
 filter_list<-c('allele','miss','het','GQfiltered')
-f_list3<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'int2',int2)
-plot_venn3<-plot_venn(f_list3,info,'int2',int2)
-int3<-make_list(f_list3)
+int3<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'int2',int2)
+
 list_final<-colsplit(int3,'.1_',c('CHROM','POS'))
 list_final$CHROM<-paste0(list_final$CHROM,'.1')
 write.table(list_final,paste0(dir,'/list_kept.txt'),col.names=F,row.names=F,quote=F,sep='\t')
