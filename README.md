@@ -1,8 +1,10 @@
 # Filter vcf file
 
 Histoiry of the pipeline:
+
 	Version 0: Version of march 2021, used for SeqApiPop vcf filtering
-	Version 1: update of version 0, addition of an option to take the data type (haploid or diploid) into account when doing filtering as it impacts the filtering done on heterozygous sites. Also small update on the plotting function.
+
+	Version 1: update of version 0, addition of an option to take the data type (haploid or diploid) into account when doing filtering as it impacts the filtering done on heterozygous sites. Also small update on the plotting function.\\
 
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 - [1. introduction](#1-introduction)
@@ -50,7 +52,7 @@ MQRankSum and ReadPosRankSum (italics): were finally not used in the filters, as
 
 * **QUAL** = Phred-scaled quality score for the assertion made in ALT. The more samples have the ATL allele, the higher the QUAL score
 * DP = In the INFO field: combined depth across samples
-* **QD** = QUAL score normalized by allele depth (AD). For a single sample, the HaplotypeCaller calculates the QD by taking QUAL/AD. For multiple samples, HaplotypeCaller and GenotypeGVCFs calculate the QD by taking QUAL/AD of samples with a non hom-ref genotype call. The reason we leave out the samples with a hom-ref call is to not penalize the QUAL for the other samples with the variant call. QD is roughly speaking QUAL / Sum(Sum(AD)). More complex for [InDels](https://gatkforums.broadinstitute.org/gatk/discussion/comment/18866).
+* **QD** = QUAL score normalized by allele depth (AD). For a single sample, the HaplotypeCaller calculates the QD by taking QUAL/AD. For multiple samples, HaplotypeCaller and GenotypeGVCFs calculate the QD by taking QUAL/AD of samples with a non hom-ref genotype call. The reason we leave out the samples with a hom-ref call is to not penalize the QUAL for the other samples with the variant call. QD is roughly speaking QUAL / Sum(Sum(AD)). 
 * AC = Allele count in genotypes, for each ALT allele, in the same order as listed
 * AF = allele frequency for each ALT allele in the same order as listed: use this when estimated from primary data, not called genotypes.
 
@@ -59,7 +61,7 @@ MQRankSum and ReadPosRankSum (italics): were finally not used in the filters, as
 * AD = Allele Depth. Only informative reads counted. Used for calculating QD (see INFO fields). Sum of AD can be inferior to DP.
 * DP = depth for the given sample.
 * PGT = Phased Genotype.
-* PID = The PID contains the first site in the phased sites. For example, if sites 1,2,3 are phased, the PIDs for all the 3 sites will contain 1. See discussion about [read-backed phasing](https://gatkforums.broadinstitute.org/gatk/discussion/45/purpose-and-operation-of-read-backed-phasing).
+* PID = The PID contains the first site in the phased sites. For example, if sites 1,2,3 are phased, the PIDs for all the 3 sites will contain 1.
 * **GQ** = Genotyping Quality: difference between the second lowest PL and the lowest PL (which is always 0.
 * PL = : normalized Phred-scaled likelihoods of the genotypes considered in the variant record for each sample.
 * PS : phase set. A phase set is defined as a set of phased genotypes to which this genotype belongs.
@@ -125,7 +127,7 @@ The variables limit_FS, limit_SOR ... limit_het can either be set to a specified
 * The variable #run can take the values: 'diagnostic', 'filter_all' or 'filter_sequential'
   - diagnostic: will only output the distribution plots for each quality parameter, to help decide on threshold values setting.
   - filter_all: will filter the vcf file using all parameters set by the variables simultaneously, as specified in the kept_above_threshold and kept_below_threshold variables
-  - filter_sequential: filter on each parameter set by the variables, but sequencially.
+  - filter_sequential: filter on each parameter set by the variables, but sequencially, and produce a dedicated vcf file for each of the applied filter. 
 
 ### 4.4. Parameters used in the study
 #### 4.4.1 Plotting the diagnostic histograms
