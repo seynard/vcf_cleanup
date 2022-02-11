@@ -1,9 +1,7 @@
 # Filter vcf file
 
-Histoiry of the pipeline:
-
-	Version 0: Version of march 2021, used for SeqApiPop vcf filtering
-
+Histoiry of the pipeline:\\
+	Version 0: Version of march 2021, used for SeqApiPop vcf filtering\\
 	Version 1: update of version 0, addition of an option to take the data type (haploid or diploid) into account when doing filtering as it impacts the filtering done on heterozygous sites. Also small update on the plotting function.\\
 
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
