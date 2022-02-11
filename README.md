@@ -70,11 +70,11 @@ The remaining heterozygote calls (< 1%) are retained and set to missing to missi
 
 * [run_vcfcleanup.sh](Scripts_2_VcfCleanup/run_vcfcleanup.sh), will call the script:
   * [vcf_cleanup.sh](Scripts_2_VcfCleanup/vcf_cleanup.sh), which will call the scripts:
-	For the option 'diagnostic': 
+	* For the option 'diagnostic': 
 		* [diagnostic.r](Scripts_2_VcfCleanup/diagnostic.r). Will output:
 			* histogram and ecdf plots for the distribution of the various quality estimators in the input vcf.
 			* Values set for filtering in run_vcfcleanup.sh will be indicated on the plots
-	For the options 'filter_sequential' or 'filter_all': 
+	* For the options 'filter_sequential' or 'filter_all': 
 		* [filter_list.r](Scripts_2_VcfCleanup/filter_list.r). Will output:
 			* Filters will be run, producing lists of SNPs containing values of interest.
 		* [filter.r](Scripts_2_VcfCleanup/filter.r). Will output:
