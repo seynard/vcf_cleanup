@@ -173,8 +173,8 @@ quantile_prob_above_threshold=0.1
 quantile_prob_below_threshold=0.9
 kept_above_threshold="MQ_QUAL_QD~GQ~GQ"
 kept_below_threshold="FS_SOR_allele~miss_het~GQfiltered"
+type='haploid'
 run='diagnostic'
-type=haploid
 # end parameters ###############################################
 sbatch -W -J vcf_diag -o ${DIROUT}/log/vcf_cleanup.o -e ${DIROUT}/log/vcf_cleanup.e \
 		--wrap="${SCRIPTS}/vcf_cleanup.sh ${username} ${SCRIPTS} ${DIRIN} ${DIROUT} ${VCFIN} \
@@ -342,7 +342,7 @@ quantile_prob_above_threshold=0.1
 quantile_prob_below_threshold=0.9
 kept_above_threshold="MQ_QUAL_QD~GQ~GQ"
 kept_below_threshold="FS_SOR_allele~miss_het~GQfiltered"
-type=haploid
+type='haploid'
 run='filter_all'
 # end parameters ##############################################
 sbatch -W -J vcf_filter -o ${DIROUT}/log/vcf_cleanup.o -e ${DIROUT}/log/vcf_cleanup.e \
