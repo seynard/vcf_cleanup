@@ -1,7 +1,7 @@
 # Filter vcf file
 
-Histoiry of the pipeline: written in 2018 by S Eynard, updated by A Vignal in 2019. Version 0 made by S Eynard in 2020 and 2021, used for SeqApiPop. Version 1, update of version 0, addition 
-of an option to take the data type (haploid or diploid) into account when doing filtering as it impacts the filtering done on heterozygous sites. Also small update on the plotting function.
+Histoiry of the pipeline: written in 2018 by S Eynard, updated by A Vignal in 2019. Version 0 finalised by S Eynard and A Vignal in 2021, and used for SeqApiPop. Version 1, update of version 0, addition 
+of an option to take the data type (haploid or diploid) into account when doing filtering as it impacts the filtering done on heterozygotes sites. Also small update on the plotting function.
 
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 - [1. introduction](#1-introduction)
@@ -32,12 +32,10 @@ of an option to take the data type (haploid or diploid) into account when doing 
 
 [On hard filtering variants](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants)
 
-Variants were filtered on the INFO field and on samples-level annotations of the vcf. If haploid individuals are genotyped under the diploid model, SNPs with a high proportion of heterozygote calls were also filtered out, option type haploid/diploid. Finally, we removed the SNP markers having an additional allele noted *, which are indels (InDel), that can't be managed by subsequent plink analyses.
+Variants were filtered on the INFO field and on samples-level annotations of the vcf. Additionally, we removed the SNP markers having an allele noted *, as observed for indels (InDel), that cannot be managed easily in subsequent analyses.
 
 ## 2. Filters on annotations in the vcf file
 The general marker INFO fields (FS, SOR, MQ...) and the sample level annotations that were analysed by plotting their distribution of values in the dataset and/or used for filtering are indicated in bold in the lists 2.1 and 2.2. Other annotations (DP, AC, AF) are indicated for reference.
-
-MQRankSum and ReadPosRankSum (italics): were finally not used in the filters, as suggested by the distribution of their values on the plots (see histograms and ECDF in Figures_S1_VcfCleanup and below).
 
 ### 2.1. In the INFO field: general SNP quality estimations
 * **FS** = FisherStrand; phred-scaled probability that there is strand bias at the site.
@@ -64,43 +62,51 @@ MQRankSum and ReadPosRankSum (italics): were finally not used in the filters, as
 * PS : phase set. A phase set is defined as a set of phased genotypes to which this genotype belongs.
 
 ## 3. Other filters
-* SNPs with more than 3 alleles were filtered out (**variable limit_allele=3**)
-* As we sequenced haploid drones, SNPs with a high proportion of heterozygote calls (**variable limit_het=0.01**) were filtered out. Some heterozygote calls (< 1%) had to be retained to avoid loosing too many markers. These were probably genotypiong errors and were set to missing.
+* SNPs with more than 3 alleles were filtered out (**variable limit_allele=3**), can be ajusted to ignore tri-allelic markers directly. 
+* If 'type' is set as haploid, for example when honeybee haploid drones are sequenced, SNPs with a high proportion of heterozygote calls (**variable limit_het=0.01**) were filtered out. 
+The remaining heterozygote calls (< 1%) are retained and set to missing to missing as they are probably genotypiong errors. Although SNPs with more than 5% of missing data were filtered out, some markers may have more than 5% missing data after complete filtering due to the hetozygote calls set to missing. When diploid individuals are sequenced no filter on heterozygotes calls are applied. 
 
 ## 4. SCRIPTS for filtering
 
 * [run_vcfcleanup.sh](Scripts_2_VcfCleanup/run_vcfcleanup.sh), will call the script:
   * [vcf_cleanup.sh](Scripts_2_VcfCleanup/vcf_cleanup.sh), which will call the scripts:
-    * [diagnostic.r](Scripts_2_VcfCleanup/diagnostic.r). Will output:
-	  * histogram and ecdf plots for the distribution of the various quality estimators in the input vcf.
-	  * Values set for filtering in run_vcfcleanup.sh will be indicated on the plots
-    * [filter.r](Scripts_2_VcfCleanup/filter.r). Will output:
-        * Venn diagrams
-		* the list of SNPs to keep: list_kept.txt.
-			* Any SNP marker having > 3 alleles or one of the alleles being an indel (noted '*' in the ALT field ofthe vcf) will be removed by the script.
-		    * list_kept.txt will be used by vcf_cleanup.sh to produce the filtered vcf.
-		* the number of SNPs in the input and the output vcfs will be counted.
-    * [filter_list.r](Scripts_2_VcfCleanup/filter_list.r). Will output:
-	    * Filters will be run, producing intermediate vcf files and the number of SNPs will be counted counted for each vcf file.
-		* Will remove any SNP marker having > 3 alleles or one of the alleles being an indel (noted '*' in the ALT field of the vcf)
-    * [count_phased_geno.py](Scripts_2_VcfCleanup/count_phased_geno.py). Will output:
-      * count_phased_geno.txt : number of unphased, phased and missing genotype calls for each variant of the input vcf
+	For the option 'diagnostic': 
+		* [diagnostic.r](Scripts_2_VcfCleanup/diagnostic.r). Will output:
+			* histogram and ecdf plots for the distribution of the various quality estimators in the input vcf.
+			* Values set for filtering in run_vcfcleanup.sh will be indicated on the plots
+	For the options 'filter_sequential' or 'filter_all': 
+		* [filter_list.r](Scripts_2_VcfCleanup/filter_list.r). Will output:
+			* Filters will be run, producing lists of SNPs containing values of interest.
+		* [filter.r](Scripts_2_VcfCleanup/filter.r). Will output:
+			* Venn diagrams
+			* the list of SNPs to keep: list_kept.txt.
+				* list_kept.txt will be used by vcf_cleanup.sh to produce the filtered vcf.
+			* the number of SNPs in the input and the output vcfs will be counted.
+		* [count_phased_geno.py](Scripts_2_VcfCleanup/count_phased_geno.py). Will output:
+			* count_phased_geno.txt : number of unphased, phased and missing genotype calls for each variant of the input vcf
 
-* According to the [type of run](#413-variables-to-edit-for-type-of-run): 'diagnostic', 'filter_all' or 'filter_sequential', only the diagnostic plots will be produced or the plots plus the filtering.
+* Options: 'diagnostic', 'filter_sequential' or 'filter_all'
+'diagnostic' will produce diagnostic plots only
+'filter_sequential' and 'filter_all' will perform filtering and produce filtered vcfs, 1 for each of our variable of interested one after the other if 'filter_sequential' or 1 fully filtered vcf for 'filter_all'.
 
-### 4.1. General variables to edit in the calling script run_vcfcleanup.sh
-* paths, number of authorised alleles, etc.
-* All editing of paths and values for filters are done in this script
+* Run: option 1, 2 or 3 (run_vcf_cleanup1.sh, run_vcf_cleanup2.sh, run_vcf_cleanup3.sh)
+Option1: if there is no hypothesis on threshold values for filtering (use of -999, the diagnostic script will provide values for filtering based on quantile distribution estimation).
+Option2: if there is hypothesis on threshold values for filtering but one wants the diagnostic plots to inform on the best proposed value (use of -999 for diagnostic only. The diagnostic script will suggest values for filtering based on quantile distribution estimation).
+Option3: if there is an hypothesis on threshold values that we want to be applied for diagnostic plots and filtering of the vcf file.
+
+### 4.1. General variables to edit in the calling script run_vcf_cleanup.sh
+* All editing of paths
   - username=avignal # Deprecated
   - SCRIPTS='~/seqapipopOnHAV3_1/vcf_cleanup_scripts' #path to the other scripts called
   - DIRIN='~/seqapipopOnHAV3_1/combineGVCFs/The870vcf' #path to directory containing the input vcf
   - DIROUT='~/seqapipopOnHAV3_1/vcf_cleanup' #path to output directory
   - VCFIN='MetaGenotypesCalled870_raw_snps.vcf.gz' #name of the vcf file to filter
-  - limit_allele=3 #accept up to three alleles (edit to 2 or 4)
 
 ### 4.2. Variables to edit for quality filter threshold values :
 The variables limit_FS, limit_SOR ... limit_het can either be set to a specified value, or set to -999, in which case each filter threshold will be calculated such as a percentage of the data, specified in the variables quantile_prob_above_threshold and quantile_prob_below_threshold, will be kept.
 
+* type=haploid #can be diploid, and therefore will not apply filtering on heterozygotes calls
+* limit_allele=3 #accept up to three alleles (edit to 2 or 4)
 * limit_FS=61
 * limit_SOR=4
 * limit_MQ=39
@@ -112,13 +118,13 @@ The variables limit_FS, limit_SOR ... limit_het can either be set to a specified
 * limit_miss=0.05
 * limit_het=0.01
 * limit_GQfiltered=0.2
-* quantile_prob_above_threshold=0.1
-  - In this example, any of the variables above for which variants are kept above a threshold is set to -999, will be adjusted to eliminate 10 % of the data.
-* quantile_prob_below_threshold=0.9
-   - In this example, any of the variables above for which variants are kept below a threshold is set to -999, will be adjusted to eliminate 10 % of the data.
-* kept_above_threshold="MQ_QUAL_QD\~GQ\~GQ"
-* kept_below_threshold="FS_SOR_allele\~miss_het\~GQfiltered"
-  - kept_above_threshold and kept_below_threshold: variables are separated by "_" and groups of variables by "~". The number of groups of variables must be the same, hence GQ in two groups for kept_above_threshold
+* quantile_prob_above_threshold=0.1 #In this example, any of the variables above for which variants are kept above a threshold is set to -999, will be adjusted to eliminate 10 % of the data.
+* quantile_prob_below_threshold=0.9 #In this example, any of the variables above for which variants are kept below a threshold is set to -999, will be adjusted to eliminate 10 % of the data.
+* kept_above_threshold="MQ_QUAL_QD\~GQ\~GQ" #variables for which we want to filter (keep SNPs) above a certain threshold
+* kept_below_threshold="FS_SOR_allele\~miss_het\~GQfiltered" #variables for which we want to filter keep SNPs) below a certain threshold
+
+For the purpose of the diagnostic, filters need to be applied in a specific order (here defined as i) technical variable such as SOR, FS, number of alleles ... ii) quality variables such as QUAL and QD and iii) sample specific variables such as rate of missing genotypes, heterozygotes calls, and GQ content. 
+The '~' separate groups of variables, the '_' separate each variable within a group.
 
 ### 4.3. Variables to edit for type of run
 * The variable #run can take the values: 'diagnostic', 'filter_all' or 'filter_sequential'
@@ -168,13 +174,14 @@ quantile_prob_below_threshold=0.9
 kept_above_threshold="MQ_QUAL_QD~GQ~GQ"
 kept_below_threshold="FS_SOR_allele~miss_het~GQfiltered"
 run='diagnostic'
+type=haploid
 # end parameters ###############################################
-sbatch -W -J vcf_cleanup -o ${DIROUT}/log/vcf_cleanup.o -e ${DIROUT}/log/vcf_cleanup.e \
+sbatch -W -J vcf_diag -o ${DIROUT}/log/vcf_cleanup.o -e ${DIROUT}/log/vcf_cleanup.e \
 		--wrap="${SCRIPTS}/vcf_cleanup.sh ${username} ${SCRIPTS} ${DIRIN} ${DIROUT} ${VCFIN} \
 		${limit_allele} ${limit_FS} ${limit_SOR} ${limit_MQ} ${limit_MQRankSum} ${limit_ReadPosRankSum} \
 		${limit_QUAL} ${limit_QD} ${limit_GQ} ${limit_miss} ${limit_het} ${limit_GQfiltered} \
 		${quantile_prob_above_threshold} ${quantile_prob_below_threshold} \
-		${kept_above_threshold} ${kept_below_threshold} ${run}"
+		${kept_above_threshold} ${kept_below_threshold} ${run} ${type}"
 
 # end of file
 ```
@@ -335,14 +342,15 @@ quantile_prob_above_threshold=0.1
 quantile_prob_below_threshold=0.9
 kept_above_threshold="MQ_QUAL_QD~GQ~GQ"
 kept_below_threshold="FS_SOR_allele~miss_het~GQfiltered"
+type=haploid
 run='filter_all'
 # end parameters ##############################################
-sbatch -W -J vcf_cleanup -o ${DIROUT}/log/vcf_cleanup.o -e ${DIROUT}/log/vcf_cleanup.e \
+sbatch -W -J vcf_filter -o ${DIROUT}/log/vcf_cleanup.o -e ${DIROUT}/log/vcf_cleanup.e \
 		--wrap="${SCRIPTS}/vcf_cleanup.sh ${username} ${SCRIPTS} ${DIRIN} ${DIROUT} ${VCFIN} \
 		${limit_allele} ${limit_FS} ${limit_SOR} ${limit_MQ} ${limit_MQRankSum} ${limit_ReadPosRankSum} \
 		${limit_QUAL} ${limit_QD} ${limit_GQ} ${limit_miss} ${limit_het} ${limit_GQfiltered} \
 		${quantile_prob_above_threshold} ${quantile_prob_below_threshold} \
-		${kept_above_threshold} ${kept_below_threshold} ${run}"
+		${kept_above_threshold} ${kept_below_threshold} ${run} ${type}"
 
 # end of file
 ```
@@ -380,37 +388,4 @@ Int1 is the intersect of the mapping quality filters. QUAL: Phred-scaled quality
 **Filters individual genotyping quality.**
 
 Int2 is the intersect of the previous filters. Filters are (i) het: proportion of heterozygote calls less than 1% for a SNP, as haploid drones were sequenced, the remaining heterozygote calls were set to missing; (ii) allele: less than 4 alleles for a SNP; (iii) miss: less than 5% missing data; (iv) GCfiltered: SNPs are removed if more than 20% samples have a genotyping quality (GQ) under 10. Note: although SNPs with more than 5% of missing data were filtered out, some markers may have more than 5% missing data due to the heterozygote calls that were set to missing.
-
------------------------
-* **Final vcf file:**
-  - **MetaGenotypesCalled870_raw_snps_allfilter.vcf**
-
-* **The final vcf file has just over 7 million SNPs : 7,023,976 in total.**
-
-* **However, although SNPs with more than 5% of missing data were filtered out, some markers may have more than 5% missing data due to the hetozygote calls that were set to missing.**
-
-* **Markers can have up to 3 alleles**
-
-**Number of SNPs per chromosome:**
-
-| Accession   |Chr| Nb. SNP |
-|:----------- |---:|-----:|
-| NC_001566.1 |MT|    287 |
-| NC_037638.1 | 1 |   913023 |
-| NC_037639.1 | 2 |    534733 |
-| NC_037640.1 | 3 |    442882 |
-| NC_037641.1 | 4 |    440141 |
-| NC_037642.1 | 5 |    462122 |
-| NC_037643.1 | 6 |    577596 |
-| NC_037644.1 | 7 |    463575 |
-| NC_037645.1 | 8 |    397891 |
-| NC_037646.1 | 9 |    378566 |
-| NC_037647.1 | 10|   355296 |
-| NC_037648.1 | 11|    441395 |
-| NC_037649.1 | 12|    388488 |
-| NC_037650.1 | 13|    378466 |
-| NC_037651.1 | 14|    330298 |
-| NC_037652.1 | 15|    285750 |
-| NC_037653.1 | 16|    233467 |
-| Sum   | Sum |  7023976 |
 
