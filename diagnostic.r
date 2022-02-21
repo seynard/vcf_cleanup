@@ -1,21 +1,25 @@
 #module load system/R-3.5.1
 #R
-#dir='/work/project/dynagen/seynard/NewVcfCleanUp/results'
-args<-commandArgs(TRUE)
-library(data.table)
-library(ggplot2)
-library(reshape2)
-library(viridis)
+######## functions ######## 
+installpackages<-function(package_name){if(package_name %in% rownames(installed.packages()) == FALSE) {install.packages(package_name)}}
 ecdf_fun<-function(x,perc) ecdf(x)(perc)
-#obligatory arguments
+###########################  
+######## parameters ######## 
+args<-commandArgs(TRUE)
 dir<-args[1]
 quantile_prob_above_threshold<-as.numeric(args[2])
 kept_above_threshold<-args[3]
 args_above=args[4]
-ABOVE<-data.frame(filt=unlist(strsplit(kept_above_threshold,'_')),Filt=unlist(strsplit(args_above,'_')),info='above')
 quantile_prob_below_threshold<-as.numeric(args[5])
 kept_below_threshold<-args[6]
 args_below=args[7]
+###########################  
+package_list<-c('data.table','ggplot2','reshape2','viridis')
+for(i in 1:length(package_list)){
+	installpackages(package_list[i])
+	library(package_list[i],character.only=T)}
+	
+ABOVE<-data.frame(filt=unlist(strsplit(kept_above_threshold,'_')),Filt=unlist(strsplit(args_above,'_')),info='above')
 BELOW<-data.frame(filt=unlist(strsplit(kept_below_threshold,'_')),Filt=unlist(strsplit(args_below,'_')),info='below')
 
 filter_info<-rbind(ABOVE,BELOW)
