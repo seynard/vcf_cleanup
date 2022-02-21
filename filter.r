@@ -1,40 +1,7 @@
 #module load system/R-3.5.1
 #R
-#dir='/work/project/dynagen/seynard/GWAS/BeeStrongHAV3_1'
-library(VennDiagram)
-library(data.table)
-library(RColorBrewer)
-library(reshape2)
-library(VennDiagram)
-library(grDevices)
-args<-commandArgs(TRUE)
-#obligatory arguments
-dir<-args[1]
-#dir<-'/work/project/dynagen/seynard/GWAS/BeeStrongHAV3_1'
-kept_above_threshold<-args[2]
-#kept_above_threshold<-"MQ_QUAL_QD_GQ_GQ"
-args_above=args[3]
-#args_above="39_200_20_10_10_"
-ABOVE<-data.frame(filt=unlist(strsplit(kept_above_threshold,'_')),Filt=unlist(strsplit(args_above,'_')),info='above')
-kept_below_threshold<-args[4]
-#kept_below_threshold<-"FS_SOR_allele_miss_het_GQfiltered"
-args_below=args[5]
-#args_below="61_4_3_0.05_0.01_0.2"
-BELOW<-data.frame(filt=unlist(strsplit(kept_below_threshold,'_')),Filt=unlist(strsplit(args_below,'_')),info='below')
-filter_info<-rbind(ABOVE,BELOW)
-filter_info<-filter_info[!duplicated(filter_info),]
-print(filter_info)
-filter_info$Filt<-as.numeric(as.character(filter_info$Filt))
-
-info<-fread(paste0(dir,'/info.txt'),header=T,data.table=F)
-if('miss'%in%filter_info$filt){miss<-fread(paste0(dir,'/missing.txt'),header=T,data.table=F)
-	info$miss<-miss$Miss}
-if('het'%in%filter_info$filt){het<-fread(paste0(dir,'/heterozygous.txt'),header=T,data.table=F)
-	info$het<-het$Het}
-if('GQ'%in%filter_info$filt & 'GQfiltered'%in%filter_info$filt){gq<-fread(paste0(dir,'/GQfiltered.txt'),header=T,data.table=F)
-	info$GQfiltered<-gq[,3]}
-for(i in 5:ncol(info)){info[,i][info[,i]=='.']<-0; info[,i]<-as.numeric(info[,i])}	
-
+######## functions ######## 
+installpackages<-function(package_name){if(package_name %in% rownames(installed.packages()) == FALSE) {install.packages(package_name)}}
 run_filter<-function(filter_list,filter_name,filter_value,threshold_direction,infile,previous_markers_name,previous_markers){
 	f_list<-list()
 	name_filter<-vector()
@@ -52,6 +19,10 @@ run_filter<-function(filter_list,filter_name,filter_value,threshold_direction,in
 		}
 	}
 	f_list<-f_list[lapply(f_list,length)>0] 
+	return(f_list)
+}
+plot_venn<-function(filter_list,infile,previous_markers_name,previous_markers){
+	f_list<-infile
 	name_filter<-name_filter[!is.na(name_filter)]
 	if(previous_markers_name!='none'){f_list[[length(f_list)+1]]<-(previous_markers)
 		name_filter<-c(name_filter,previous_markers_name)}
@@ -72,20 +43,56 @@ run_filter<-function(filter_list,filter_name,filter_value,threshold_direction,in
 	pdf(paste0(dir,'/venn',paste0(name_filter,collapse='_'),'.pdf'),width=10,height=10)
 	grid.draw(plot)
 	dev.off()
+}
+make_list<-function(infile){
+	f_list<-infile
 	int<-Reduce(intersect,f_list)
 	return(int)
 }
+###########################  
+######## parameters ######## 
+args<-commandArgs(TRUE)
+dir<-args[1]
+kept_above_threshold<-args[2]
+args_above=args[3]
+kept_below_threshold<-args[4]
+args_below=args[5]
+###########################  
+package_list<-c('data.table','VennDiagram','reshape2','RColorBrewer','grDevices')
+for(i in 1:length(package_list)){
+	installpackages(package_list[i])
+	library(package_list[i],character.only=T)}
 
+ABOVE<-data.frame(filt=unlist(strsplit(kept_above_threshold,'_')),Filt=unlist(strsplit(args_above,'_')),info='above')
+BELOW<-data.frame(filt=unlist(strsplit(kept_below_threshold,'_')),Filt=unlist(strsplit(args_below,'_')),info='below')
+filter_info<-rbind(ABOVE,BELOW)
+filter_info<-filter_info[!duplicated(filter_info),]
+print(filter_info)
+filter_info$Filt<-as.numeric(as.character(filter_info$Filt))
+
+info<-fread(paste0(dir,'/info.txt'),header=T,data.table=F)
+if('miss'%in%filter_info$filt){miss<-fread(paste0(dir,'/missing.txt'),header=T,data.table=F)
+	info$miss<-miss$Miss}
+if('het'%in%filter_info$filt){het<-fread(paste0(dir,'/heterozygous.txt'),header=T,data.table=F)
+	info$het<-het$Het}
+if('GQ'%in%filter_info$filt & 'GQfiltered'%in%filter_info$filt){gq<-fread(paste0(dir,'/GQfiltered.txt'),header=T,data.table=F)
+	info$GQfiltered<-gq[,3]}
+for(i in 5:ncol(info)){info[,i][info[,i]=='.']<-0; info[,i]<-as.numeric(info[,i])}	
 #first venn (mapping quality filter)
 filter_list<-c('FS','SOR','MQ','MQRankSum','ReadPosRankSum')
-int1<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'none',NA)
+f_list1<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'none',NA)
+plot_venn1<-plot_venn(f_list1,info,'none',NA)
+int1<-make_list(f_list1)
 #second venn quality
 filter_list<-c('QUAL','QD')
-int2<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'int1',int1)
+f_list2<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'int1',int1)
+plot_venn2<-plot_venn(f_list2,info,'int1',int1)
+int2<-make_list(f_list2)
 #third venn allele
 filter_list<-c('allele','miss','het','GQfiltered')
-int3<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'int2',int2)
-
+f_list3<-run_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'int2',int2)
+plot_venn3<-plot_venn(f_list3,info,'int2',int2)
+int3<-make_list(f_list3)
 list_final<-colsplit(int3,'.1_',c('CHROM','POS'))
 list_final$CHROM<-paste0(list_final$CHROM,'.1')
 write.table(list_final,paste0(dir,'/list_kept.txt'),col.names=F,row.names=F,quote=F,sep='\t')
