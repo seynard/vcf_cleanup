@@ -1,7 +1,7 @@
 #module load system/R-3.5.1
 #R
 ######## functions ######## 
-installpackages<-function(package_name){if(package_name %in% rownames(installed.packages()) == FALSE) {install.packages(package_name)}}
+installpackages<-function(package_name){if(package_name %in% rownames(installed.packages()) == FALSE) {install.packages(package_name, repos = "http://cran.us.r-project.org")}}
 ###########################  
 ######## parameters ######## 
 args<-commandArgs(TRUE)
