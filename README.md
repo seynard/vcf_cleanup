@@ -34,6 +34,18 @@ of an option to take the data type (haploid or diploid) into account when doing 
 
 Variants were filtered on the INFO field and on samples-level annotations of the vcf. Additionally, we removed the SNP markers having an allele noted *, as observed for indels (InDel), that cannot be managed easily in subsequent analyses.
 
+### R packages required
+The scripts will work on a slurm cluster. In theory, they will install the required R packages if missing, but this will not always work, according to the version of R used (see module load in the run_vcfcleanup_3.sh script). The best is to install the required packages ('data.table','VennDiagram','reshape2','RColorBrewer','grDevices','ggplot2','viridis') before running the script.
+
+### To edit in run_vcfcleanup_3.sh
+* run='diagnostic'
+Will only make the plots
+* run='filter_all'
+Will produce a vcf file once all filters are passed
+* run='filter_sequential'
+Will produce a vcf file at each filtering stage (not usually useful)
+
+
 ## 2. Filters on annotations in the vcf file
 The general marker INFO fields (FS, SOR, MQ...) and the sample level annotations that were analysed by plotting their distribution of values in the dataset and/or used for filtering are indicated in bold in the lists 2.1 and 2.2. Other annotations (DP, AC, AF) are indicated for reference.
 
@@ -124,6 +136,10 @@ The variables limit_FS, limit_SOR ... limit_het can either be set to a specified
 * kept_below_threshold="FS_SOR_allele\~miss_het\~GQfiltered" #variables for which we want to filter keep SNPs) below a certain threshold
 
 For the purpose of the diagnostic, filters need to be applied in a specific order (here defined as i) technical variable such as SOR, FS, number of alleles ... ii) quality variables such as QUAL and QD and iii) sample specific variables such as rate of missing genotypes, heterozygotes calls, and GQ content. 
+in:
+  - kept_above_threshold="MQ_QUAL_QD ~GQ ~GQ"
+  - kept_below_threshold="FS_SOR_allele ~miss_het ~GQfiltered"
+Filter joined by a _ are done together. Groups of filters are separated by ~
 The '~' separate groups of variables, the '_' separate each variable within a group.
 
 ### 4.3. Variables to edit for type of run
