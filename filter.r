@@ -38,8 +38,8 @@ name_filter<-function(filter_list,filter_name,filter_value,threshold_direction,i
 plot_venn<-function(filter_list,infile,name_filter,previous_markers_name,previous_markers){
 	f_list<-infile
 	name_filter<-name_filter[!is.na(name_filter)]
-	if(previous_markers_name!='none'){f_list[[length(f_list)+1]]<-(previous_markers)
-		name_filter<-c(name_filter,previous_markers_name)}
+#	if(previous_markers_name!='none'){f_list[[length(f_list)+1]]<-(previous_markers)
+#		name_filter<-c(name_filter,previous_markers_name)}
 #	if('allele'%in%filter_list){name_filter<-c('allele',name_filter)}
 	myCol<-brewer.pal(length(f_list),"Set2")
 	plot<-venn.diagram(
