@@ -16,6 +16,7 @@ run_filter<-function(filter_list,filter_name,filter_value,threshold_direction,in
 		}
 	}
 	f_list<-f_list[lapply(f_list,length)>0] 
+	if(previous_markers_name!='none'){f_list[[length(f_list)+1]]<-(previous_markers)}
 	return(f_list)
 }
 name_filter<-function(filter_list,filter_name,filter_value,threshold_direction,infile,previous_markers_name,previous_markers){
@@ -31,6 +32,7 @@ name_filter<-function(filter_list,filter_name,filter_value,threshold_direction,i
 			}
 		}
 	}
+	if(previous_markers_name!='none'){name_filter<-c(name_filter,previous_markers_name)}
 	return(name_filter)
 }
 plot_venn<-function(filter_list,infile,name_filter,previous_markers_name,previous_markers){
