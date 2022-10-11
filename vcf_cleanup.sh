@@ -260,6 +260,11 @@ else
 		bcftools query -f '%CHROM %POS [ %GT]\n' ${DIROUT}/${vcf} > ${DIROUT}/geno2.txt
 		sbatch -W -J count_phased_geno -o ${DIROUT}/log/count_phased_geno.o -e ${DIROUT}/log/count_phased_geno.e --wrap="python ${SCRIPTS}/count_phased_geno.py ${DIROUT} geno2.txt"
 		mv ${DIROUT}/count_phased_geno.txt ${DIROUT}/count_phased_geno_final.txt
+		
+		bcftools query -f '%CHROM %POS %REF %ALT %FS %SOR %MQ %MQRankSum %ReadPosRankSum %QUAL %QD\n' ${DIROUT}/${vcf} > ${DIROUT}/info_filter.txt
+		head='CHROM POS REF ALT FS SOR MQ MQRankSum ReadPosRankSum QUAL QD\n'
+		sed -i "1s/^/${head}/"  ${DIROUT}/info_filter.txt
+
 		#Compressing vcfs
 		bgzip -c ${DIROUT}/${vcf} > ${DIROUT}/${vcf}.gz
 		bgzip -c ${DIROUT}/${vcf_fs} > ${DIROUT}/${vcf_fs}.gz
@@ -365,6 +370,10 @@ else
 		bcftools query -f '%CHROM %POS [ %GT]\n' ${DIROUT}/${vcf} > ${DIROUT}/geno2.txt
 		sbatch -W -J count_phased_geno -o ${DIROUT}/log/count_phased_geno.o -e ${DIROUT}/log/count_phased_geno.e --wrap="python ${SCRIPTS}/count_phased_geno.py ${DIROUT} geno2.txt"
 		mv ${DIROUT}/count_phased_geno.txt ${DIROUT}/count_phased_geno_final.txt
+
+		bcftools query -f '%CHROM %POS %REF %ALT %FS %SOR %MQ %MQRankSum %ReadPosRankSum %QUAL %QD\n' ${DIROUT}/${vcf} > ${DIROUT}/info_filter.txt
+		head='CHROM POS REF ALT FS SOR MQ MQRankSum ReadPosRankSum QUAL QD\n'
+		sed -i "1s/^/${head}/"  ${DIROUT}/info_filter.txt
 
 		#Compressing vcfs
 		bgzip -c ${DIROUT}/${vcf} > ${DIROUT}/${vcf}.gz
