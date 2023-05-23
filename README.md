@@ -4,7 +4,7 @@ Histoiry of the pipeline: written in 2018 by S Eynard, updated by A Vignal in 20
 of an option to take the data type (haploid or diploid) into account when doing filtering as it impacts the filtering done on heterozygotes sites. Also small update on the plotting function.
 
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
-- [1. introduction](#1-introduction)
+- [1. Introduction](#1-introduction)
 - [2. Filters on annotations in the vcf file](#2-filters-on-annotations-in-the-vcf-file)
 	- [2.1. In the INFO field: general SNP quality estimations](#21-in-the-info-field-general-snp-quality-estimations)
 	- [2.2. Sample level annotations: genotype quality estimations](#22-sample-level-annotations-genotype-quality-estimations)
@@ -28,7 +28,7 @@ of an option to take the data type (haploid or diploid) into account when doing 
 - [5. results:](#5-results)
 <!-- /TOC -->
 
-## 1. introduction
+## 1. Introduction
 
 [On hard filtering variants](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants)
 
@@ -189,13 +189,13 @@ sbatch -W -J vcf_diag -o ${DIROUT}/log/vcf_cleanup.o -e ${DIROUT}/log/vcf_cleanu
 
 ##### 4.4.1.1 Mapping quality metrics: Stand Odds Ratio (SOR)
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_SOR_Hist.pdf.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_SOR_Hist_2.pdf.png)
 
 Counts of SNPs according to SOR values. The blue dotted line indicates the threshold retained for filtering the vcf: SOR > 4.
 
 -----------------------
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_SOR_ECDF.pdf.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_SOR_ECDF_2.pdf.png)
 Empirical cumulative distribution function of SOR values.  The blue dotted line indicates the threshold used for filtering the vcf: SOR > 4.
 
 -----------------------
@@ -204,7 +204,7 @@ Empirical cumulative distribution function of SOR values.  The blue dotted line 
 
 ##### 4.4.1.2 Mapping quality metrics: Fisher Strand (FS)
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_FS_Hist.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_FS_Hist_2.png)
 Counts of SNPs according to FS values. The blue dotted line indicates the threshold used for filtering the vcf: FS < 61. X axis is on a log scale log(61)=1.785.
 
 -----------------------
@@ -213,7 +213,7 @@ Counts of SNPs according to FS values. The blue dotted line indicates the thresh
 
 ##### 4.4.1.3 Mapping quality metrics: Mapping Quality (MQ)
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_MQ_Hist.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_MQ_Hist_2.png)
 Counts of SNPs according to MQ values. The blue dotted line indicates the threshold used for filtering the vcf: MQ > 40.
 
 -----------------------
@@ -222,12 +222,12 @@ Counts of SNPs according to MQ values. The blue dotted line indicates the thresh
 
 ##### 4.4.1.4 Genotyping quality metrics: SNP quality (QUAL)
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_QUAL_hist.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_QUAL_hist_2.png)
 Counts of SNPs according to QUAL values. The blue dotted line indicates the threshold used for filtering the vcf: QUAL > 200. X axis is on a log scale log(200)=2.3.
 
 -----------------------
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_QUAL_ECDF.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_QUAL_ECDF_2.png)
 Empirical cumulative distribution function of QUAL values. The blue dotted line indicates the threshold used for filtering the vcf: QUAL > 200. X axis is on a log scale log(200)=2.3.
 
 -----------------------
@@ -236,12 +236,12 @@ Empirical cumulative distribution function of QUAL values. The blue dotted line 
 
 ##### 4.4.1.5 Genotyping quality metrics: quality by depth (QD)
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_QD_hist.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_QD_hist_2.png)
 Counts of SNPs according to QUAL values. The blue dotted line indicates the threshold used for filtering the vcf: QD < 20.
 
 -----------------------
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_QD_ECDF.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_QD_ECDF_2.png)
 Empirical cumulative distribution function of QUAL. values. The blue dotted line indicates the threshold used for filtering the vcf: QD < 20.
 
 -----------------------
@@ -250,12 +250,12 @@ Empirical cumulative distribution function of QUAL. values. The blue dotted line
 
 ##### 4.4.1.6. Individual genotyping metrics: heterozygote calls
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_het_hist.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_het_hist_2.png)
 Counts of SNPs according to proportion of heterozygote genotypes. The blue dotted line indicates the threshold used for filtering the vcf: heterozygote genotypes for a SNP must be < 1%.
 
 -----------------------
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_het_ECDF.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_het_ECDF_2.png)
 Empirical cumulative distribution function of heterozygote genotypes. The blue dotted line indicates the threshold used for filtering the vcf: heterozygote genotypes for a SNP must be < 1%.
 
 -----------------------
@@ -264,12 +264,12 @@ Empirical cumulative distribution function of heterozygote genotypes. The blue d
 
 ##### 4.4.1.7. Individual genotyping metrics: missing genotypes
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_miss_hist.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_miss_hist_2.png)
 Counts of SNPs according to proportion of missing genotypes. The blue dotted line indicates the threshold used for filtering the vcf: missing genotypes for a SNP must be < 5%.
 
 -----------------------
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_miss_ECDF.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_miss_ECDF_2.png)
 Empirical cumulative distribution function of missing genotypes. The blue dotted line indicates the threshold used for filtering the vcf: missing genotypes for a SNP must be < 5%.
 
 -----------------------
@@ -279,22 +279,22 @@ Empirical cumulative distribution function of missing genotypes. The blue dotted
 ##### 4.4.1.8. Individual genotyping metrics: genotype quality (QD)
 QD is a quality measure of each individual genotype. Our filter removes all SNPs having more than 20 % of genotypes having QD values < 10. In the remaining SNPs, genotypes with QD values < 10 are retained.
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_GQ_GQfiltered1.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_GQ_GQfiltered1_2.png)
 Counts of all individual GQ values for all SNPs. The blue dotted line indicates the threshold used: GQ < 10.
 
 -----------------------
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_GQ_GQfiltered2.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_GQ_GQfiltered2_2.png)
 Empirical cumulative distribution function of GQ values for all SNPs. The blue dotted line indicates the threshold used: GQ < 10.
 
 -----------------------
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_GQ_GQfiltered3.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_GQ_GQfiltered3_2.png)
 SNP counts according to proportion of genotypes with GQ < 10. The blue dotted line indicates the threshold used for filtering the vcf: proportion of genotypes for a SNP with GQ < 10%, must be < 20%.
 
 -----------------------
 
-![](SeqApiPop_2_VcfCleanup.assets/plot_decision_GQ_GQfiltered4.png)
+![](SeqApiPop_2_VcfCleanup.assets/plot_decision_GQ_GQfiltered4_2.png)
 Empirical cumulative distribution function of SNP according to their proportion of genotypes with GQ < 10. The blue dotted line indicates the threshold used for filtering the vcf: proportion of genotypes for a SNP with GQ < 10%, must be < 20%.
 
 -----------------------
@@ -358,7 +358,7 @@ sbatch -W -J vcf_filter -o ${DIROUT}/log/vcf_cleanup.o -e ${DIROUT}/log/vcf_clea
 ## 5. results:
 
 <p align="center">
-  <img src="SeqApiPop_2_VcfCleanup.assets/d450393d.png" />
+  <img src="SeqApiPop_2_VcfCleanup.assets/d450393d_2.png" />
 </p>
 
 **Filters on mapping quality (MQ) and strand bias (FS and SOR) metrics.**
@@ -370,7 +370,7 @@ FS (FisherStrand): phred-scaled probability that there is strand mapping bias at
 <div style="page-break-after: always"></div>
 
 <p align="center">
-  <img src="SeqApiPop_2_VcfCleanup.assets/b5ea5cde.png" />
+  <img src="SeqApiPop_2_VcfCleanup.assets/b5ea5cde_2.png" />
 </p>
 
 **Filters on genotyping quality.**
@@ -382,7 +382,7 @@ Int1 is the intersect of the mapping quality filters. QUAL: Phred-scaled quality
 <div style="page-break-after: always"></div>
 
 <p align="center">
-  <img src="SeqApiPop_2_VcfCleanup.assets/89e031ea.png" />
+  <img src="SeqApiPop_2_VcfCleanup.assets/89e031ea_2.png" />
 </p>
 
 **Filters individual genotyping quality.**
