@@ -3,7 +3,7 @@
 ### run command: sbatch -J clean_vcf -o ${dirin}/log/vcf_cleanup.out -e ${dirin}/log/vcf_cleanup.err --wrap="${script}/vcf_cleanup/run_vcf_cleanup.sh" ###
 
 ############################################ modules #####################################################
-module load system/R-3.6.2
+module load system/R-3.5.1
 module load bioinfo/bcftools-1.6
 module load bioinfo/tabix-0.2.5
 module load bioinfo/vcftools-0.1.15
