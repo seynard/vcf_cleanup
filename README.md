@@ -4,7 +4,7 @@ Histoiry of the pipeline: written in 2018 by S Eynard, updated by A Vignal in 20
 of an option to take the data type (haploid or diploid) into account when doing filtering as it impacts the filtering done on heterozygotes sites. Also small update on the plotting function.
 
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
-- [1. introduction](#1-introduction)
+- [1. Introduction](#1-introduction)
 - [2. Filters on annotations in the vcf file](#2-filters-on-annotations-in-the-vcf-file)
 	- [2.1. In the INFO field: general SNP quality estimations](#21-in-the-info-field-general-snp-quality-estimations)
 	- [2.2. Sample level annotations: genotype quality estimations](#22-sample-level-annotations-genotype-quality-estimations)
@@ -28,7 +28,7 @@ of an option to take the data type (haploid or diploid) into account when doing 
 - [5. results:](#5-results)
 <!-- /TOC -->
 
-## 1. introduction
+## 1. Introduction
 
 [On hard filtering variants](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants)
 
