@@ -89,7 +89,8 @@ The remaining heterozygote calls (< 1%) are retained and set to missing to missi
 'diagnostic' will produce diagnostic plots only
 'filter_sequential' and 'filter_all' will perform filtering and produce filtered vcfs, 1 for each of our variable of interested one after the other if 'filter_sequential' or 1 fully filtered vcf for 'filter_all'.
 
-* Run: option 1, 2 or 3 (run_vcf_cleanup1.sh, run_vcf_cleanup2.sh, run_vcf_cleanup3.sh)
+* Run 
+Will run sequencially 
 Option1: if there is no hypothesis on threshold values for filtering (use of -999, the diagnostic script will provide values for filtering based on quantile distribution estimation).
 Option2: if there is hypothesis on threshold values for filtering but one wants the diagnostic plots to inform on the best proposed value (use of -999 for diagnostic only. The diagnostic script will suggest values for filtering based on quantile distribution estimation).
 Option3: if there is an hypothesis on threshold values that we want to be applied for diagnostic plots and filtering of the vcf file.
