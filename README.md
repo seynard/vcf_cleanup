@@ -35,7 +35,7 @@ of an option to take the data type (haploid or diploid) into account when doing 
 Variants were filtered on the INFO field and on samples-level annotations of the vcf. Additionally, we removed the SNP markers having an allele noted *, as observed for indels (InDel), that cannot be managed easily in subsequent analyses.
 
 ### R packages required
-The scripts will work on a slurm cluster. In theory, they will install the required R packages if missing, but this will not always work, according to the version of R used (see module load in the run_vcfcleanup_3.sh script). The best is to install the required packages ('data.table','VennDiagram','reshape2','RColorBrewer','grDevices','ggplot2','viridis') before running the script.
+The scripts will work on a slurm cluster. In theory, they will install the required R packages if missing. If you experience any issue with this step please install the required packages ('data.table','VennDiagram','reshape2','RColorBrewer','grDevices','ggplot2','viridis') before running the script.
 
 ### To edit in run_vcfcleanup_3.sh
 * run='diagnostic'
@@ -101,9 +101,9 @@ The remaining heterozygote calls (< 1%) are retained and set to missing to missi
 'diagnostic' will produce diagnostic plots only
 'filter_sequential' and 'filter_all' will perform filtering and produce filtered vcfs, 1 for each of our variable of interested one after the other if 'filter_sequential' or 1 fully filtered vcf for 'filter_all'.
 
-* Run: option 1, 2 or 3 (run_vcf_cleanup1.sh, run_vcf_cleanup2.sh, run_vcf_cleanup3.sh)
-Option1: if there is no hypothesis on threshold values for filtering (use of -999, the diagnostic script will provide values for filtering based on quantile distribution estimation).
-Option2: if there is hypothesis on threshold values for filtering but one wants the diagnostic plots to inform on the best proposed value (use of -999 for diagnostic only. The diagnostic script will suggest values for filtering based on quantile distribution estimation).
+* Run: option 1, 2 or 3 (run_vcf_cleanup1.sh, run_vcf_cleanup2.sh, run_vcf_cleanup3.sh)\
+Option1: if there is no hypothesis on threshold values for filtering (use of -999, the diagnostic script will provide values for filtering based on quantile distribution estimation).\
+Option2: if there is hypothesis on threshold values for filtering but one wants the diagnostic plots to inform on the best proposed value (use of -999 for diagnostic only. The diagnostic script will suggest values for filtering based on quantile distribution estimation).\
 Option3: if there is an hypothesis on threshold values that we want to be applied for diagnostic plots and filtering of the vcf file.
 
 ### 4.1. General variables to edit in the calling script run_vcf_cleanup.sh
