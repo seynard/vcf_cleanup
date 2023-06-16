@@ -1,0 +1,21 @@
+name: vcfcleanup_env
+channels:
+  - r 
+  - bioconda
+  - defaults  
+  - conda-forge
+dependencies:
+  - bcftools==1.6
+  - tabix==0.2.5
+  - vcftools==0.1.15
+  - samtools==1.8
+  - r==3.5.1
+  - r-essentials
+  - r-base
+  - r-data.table
+  - r-reshape2
+  - r-ggplot2 
+  - r-viridis
+  - r-VennDiagram
+  - r-RColorBrewer
+
