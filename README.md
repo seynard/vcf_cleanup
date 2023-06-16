@@ -1,7 +1,8 @@
 # Filter vcf file
 
-Histoiry of the pipeline: written in 2018 by S Eynard, updated by A Vignal in 2019. Version 0 finalised by S Eynard and A Vignal in 2021, and used for SeqApiPop. Version 1, update of version 0, addition 
+History of the pipeline: written in 2018 by S Eynard, updated by A Vignal in 2019. Version 0 finalised by S Eynard and A Vignal in 2021, and used for SeqApiPop. Version 1, update of version 0, addition 
 of an option to take the data type (haploid or diploid) into account when doing filtering as it impacts the filtering done on heterozygotes sites. Also small update on the plotting function.
+In order to avoid having to manage packages and their versions we created a conda environment to load prior to runnning the script. 
 
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 - [1. Introduction](#1-introduction)
@@ -36,6 +37,14 @@ Variants were filtered on the INFO field and on samples-level annotations of the
 
 ### R packages required
 The scripts will work on a slurm cluster. In theory, they will install the required R packages if missing. If you experience any issue with this step please install the required packages ('data.table','VennDiagram','reshape2','RColorBrewer','grDevices','ggplot2','viridis') before running the script.
+
+### How to load conda environment
+```bash
+module load devel/Miniconda/Miniconda3
+conda env create -f vcfcleanup_env.yml
+conda activate vcfcleanup_env
+#conda deactivate 
+```
 
 ### To edit in run_vcfcleanup_3.sh
 * run='diagnostic'
