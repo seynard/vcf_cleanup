@@ -169,11 +169,11 @@ A run with run='diagnostic' will plot histograms and empirical cumulative distri
 #vcf filter (only done once to prepare list SNP positions)
 
 # modules #####################################################
-module load system/R-3.5.1
-module load bioinfo/bcftools-1.6
-module load bioinfo/tabix-0.2.5
-module load bioinfo/vcftools-0.1.15
-module load bioinfo/samtools-1.8
+#module load system/R-3.5.1
+#module load bioinfo/bcftools-1.6
+#module load bioinfo/tabix-0.2.5
+#module load bioinfo/vcftools-0.1.15
+#module load bioinfo/samtools-1.8
 # end modules #################################################
 
 # parameters ##################################################
@@ -338,11 +338,11 @@ Running the following script with run='filter_all', will perform the filtering a
 #vcf filter (only done once to prepare list SNP positions)
 
 # modules #####################################################
-module load system/R-3.5.1
-module load bioinfo/bcftools-1.6
-module load bioinfo/tabix-0.2.5
-module load bioinfo/vcftools-0.1.15
-module load bioinfo/samtools-1.8
+#module load system/R-3.5.1
+#module load bioinfo/bcftools-1.6
+#module load bioinfo/tabix-0.2.5
+#module load bioinfo/vcftools-0.1.15
+#module load bioinfo/samtools-1.8
 # end modules #################################################
 
 # parameters ##################################################
