@@ -203,7 +203,10 @@ else
 				bcftools +missing2ref ${DIROUT}/vcf_new.vcf  -- -m > ${DIROUT}/tmp.vcf
 				bcftools +setGT ${DIROUT}/tmp.vcf -- -t q -i 'GT="het"' -n "./." > ${DIROUT}/tmp2.vcf
 				bcftools view -i 'F_MISSING<'${limit_het}'' ${DIROUT}/tmp2.vcf | bcftools query -f '%CHROM %POS \n' > ${DIROUT}/heterozygous_keep.txt
-				vcftools --vcf ${DIRIN}/vcf_new.vcf  --positions ${DIROUT}/heterozygous_keep.txt --recode --recode-INFO-all --out ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
+				bcftools index ${DIRIN}/${VCFIN}
+				bcftools view -R ${DIROUT}/heterozygous_keep.txt ${DIRIN}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf
+#				vcftools --vcf ${DIRIN}/vcf_new.vcf  --positions ${DIROUT}/heterozygous_keep.txt --recode --recode-INFO-all --out ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
+				bcftools -Ov query -f '%CHROM %POS' ${DIROUT}/heterozygous_keep.txt > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
 				cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_het}		
 			fi
 		fi
@@ -232,7 +235,10 @@ else
 					sed -n "${i}p" ${DIROUT}/tmp.txt | awk '{print $1" "$2}' >> ${DIROUT}/gq_keep.txt
 				fi
 			done
-			vcftools --vcf ${DIRIN}/vcf_new.vcf --positions ${DIROUT}/gq_keep.txt --recode --recode-INFO-all --out ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
+			bcftools index ${DIRIN}/vcf_new.vcf
+			bcftools view -R ${DIROUT}/gq_keep.txt ${DIRIN}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf
+#			vcftools --vcf ${DIRIN}/vcf_new.vcf --positions ${DIROUT}/gq_keep.txt --recode --recode-INFO-all --out ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
+			bcftools -Ov query -f '%CHROM %POS' ${DIROUT}/gq_keep.txt > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
 			cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_gq}		
 		fi
 		
@@ -355,7 +361,10 @@ else
 		sbatch --mem=20G -W -J filter_${args_above}_${args_below} -o ${DIROUT}/log/filter_${args_above}_${args_below}.o -e ${DIROUT}/log/filter_${args_above}_${args_below}.e --wrap="Rscript ${SCRIPTS}/filter.r ${DIROUT} ${kept_above_threshold} ${args_above} ${kept_below_threshold} ${args_below}"
 
 		#filter
-		vcftools --gzvcf ${DIRIN}/${VCFIN} --positions ${DIROUT}/list_kept.txt --recode --recode-INFO-all --out ${DIROUT}/${vcf}
+		bcftools index ${DIRIN}/${VCFIN}
+		bcftools view -R ${DIROUT}/list_kept.txt ${DIRIN}/${VCFIN} > ${DIROUT}/${vcf}
+#		vcftools --gzvcf ${DIRIN}/${VCFIN} --positions ${DIROUT}/list_kept.txt --recode --recode-INFO-all --out ${DIROUT}/${vcf}
+		bcftools -Ov query -f '%CHROM %POS' ${DIROUT}/list_kept.txt ${DIROUT}/${vcf}
 		mv ${DIROUT}/${vcf}.recode.vcf ${DIROUT}/${vcf}
 		if [ "${type}" == "haploid" ]	
 			then
