@@ -1,7 +1,5 @@
-#module load system/R-3.5.1
 #R
 ######## functions ######## 
-installpackages<-function(package_name){if(package_name %in% rownames(installed.packages()) == FALSE) {install.packages(package_name)}}
 run_filter<-function(filter_list,filter_name,filter_value,threshold_direction,infile,previous_markers_name,previous_markers){
 	f_list<-list()
 	for(i in 1:length(filter_list)){
@@ -42,19 +40,21 @@ plot_venn<-function(filter_list,infile,name_filter,previous_markers_name,previou
 #		name_filter<-c(name_filter,previous_markers_name)}
 #	if('allele'%in%filter_list){name_filter<-c('allele',name_filter)}
 	myCol<-brewer.pal(length(f_list),"Set2")
-	plot<-venn.diagram(
-		x=f_list,
-		category.names=name_filter,
-		filename=NULL,
-		output=TRUE,
-		cex=0.5,
-		lwd=2,
-		col=myCol,
-		fill=myCol,
-		alpha=0.3,
-		cat.cex=1,
-		margin=c(0.3,0.3,0.3,0.3))
-	pdf(paste0(dir,'/venn',paste0(name_filter,collapse='_'),'.pdf'),width=10,height=10)
+#	plot<-venn.diagram(
+#		x=f_list,
+#		category.names=name_filter,
+#		filename=NULL,
+#		output=TRUE,
+#		cex=0.5,
+#		lwd=2,
+#		col=myCol,
+#		fill=myCol,
+#		alpha=0.3,
+#		cat.cex=1,
+#		margin=c(0.3,0.3,0.3,0.3))
+#	plot<-ggVennDiagram(f_list,category.names=name_filter)
+	plot<-venn(f_list,snames=name_filter,zcolor=myCol,ggplot=T)
+ 	pdf(paste0(dir,'/venn',paste0(name_filter,collapse='_'),'.pdf'),width=10,height=10)
 	grid.draw(plot)
 	dev.off()
 }
@@ -72,10 +72,8 @@ args_above=args[3]
 kept_below_threshold<-args[4]
 args_below=args[5]
 ###########################  
-package_list<-c('data.table','VennDiagram','reshape2','RColorBrewer','grDevices')
-for(i in 1:length(package_list)){
-	installpackages(package_list[i])
-	library(package_list[i],character.only=T)}
+package_list<-c('data.table','reshape2','venn','RColorBrewer','grDevices','grid','ggplot2','ggpolypath')
+for(i in 1:length(package_list)){library(package_list[i],character.only=T)}
 
 ABOVE<-data.frame(filt=unlist(strsplit(kept_above_threshold,'_')),Filt=unlist(strsplit(args_above,'_')),info='above')
 BELOW<-data.frame(filt=unlist(strsplit(kept_below_threshold,'_')),Filt=unlist(strsplit(args_below,'_')),info='below')
@@ -145,3 +143,4 @@ plot_venn2<-plot_venn(filter_list,f_list2,name_f2,'int1',int1)
 filter_list<-c('allele','miss','het','GQfiltered')
 name_f3<-name_filter(filter_list,filter_info$filt,filter_info$Filt,filter_info$info,info,'int2',int2)
 plot_venn3<-plot_venn(filter_list,f_list3,name_f3,'int2',int2)
+
