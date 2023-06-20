@@ -1,8 +1,4 @@
-#module load system/R-3.5.1
 #R
-######## functions ######## 
-installpackages<-function(package_name){if(package_name %in% rownames(installed.packages()) == FALSE) {install.packages(package_name, repos = "http://cran.us.r-project.org")}}
-###########################  
 ######## parameters ######## 
 args<-commandArgs(TRUE)
 dir<-args[1]
@@ -10,9 +6,7 @@ filt<-args[2]
 limits<-args[3]
 ###########################  
 package_list<-c('data.table','ggplot2','reshape2','viridis')
-for(i in 1:length(package_list)){
-	installpackages(package_list[i])
-	library(package_list[i],character.only=T)}
+for(i in 1:length(package_list)){library(package_list[i],character.only=T)}
 
 filter_info<-data.frame(filt=unlist(strsplit(filt,'_')),Filt=unlist(strsplit(limits,'_')))
 filter_info$Filt<-as.numeric(as.character(filter_info$Filt))
