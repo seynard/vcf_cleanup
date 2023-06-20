@@ -35,18 +35,47 @@ In order to avoid having to manage packages and their versions we created a cond
 
 Variants were filtered on the INFO field and on samples-level annotations of the vcf. Additionally, we removed the SNP markers having an allele noted *, as observed for indels (InDel), that cannot be managed easily in subsequent analyses.
 
-### R packages required
-The scripts will work on a slurm cluster. In theory, they will install the required R packages if missing. If you experience any issue with this step please install the required packages ('data.table','VennDiagram','reshape2','RColorBrewer','grDevices','ggplot2','viridis') before running the script.
-
-### How to load conda environment
+To download this version of the package, use the following command
 ```bash
-module load devel/Miniconda/Miniconda3
-conda env create -f vcfcleanup_env.yml
-conda activate vcfcleanup_env
-#conda deactivate 
+git clone --branch vcf_cleanup_v2 https://github.com/seynard/vcf_cleanup.git
 ```
 
-### To edit in run_vcfcleanup_3.sh
+### R packages required
+The scripts will work on a slurm cluster. In theory, the first step will be to install necessary modules and R packages. If you experience any issue with this step please install the required packages ('data.table','reshape2','RColorBrewer','grDevices','ggplot2','viridis','venn','grid','ggpolypath') before running the script.
+
+
+The first step of the script will be to install dependencies, programs and R libraries. 
+```bash
+#! /bin/bash
+#param.sh
+##### Load all necessary modules ####
+DIROUT=${1} #definied in the run script
+SCRIPTS=${2} #definied in the run script
+module load statistics/R/4.2.2
+module load bioinfo/Bcftools/1.9
+module load bioinfo/samtools/1.14
+module load devel/python/Python-3.7.9
+Rscript ${SCRIPTS}/lib.r
+```
+
+```bash
+#R
+#lib.r
+
+# function to check if a library already exists and otherwise install it
+installpackages<-function(package_name){
+	if(package_name %in% rownames(installed.packages()) == FALSE) {
+		install.packages(package_name,repos="http://cran.us.r-project.org")
+		}
+	}
+
+package_list<-c('data.table','ggplot2','reshape2','viridis','venn','RColorBrewer','grDevices','grid','ggpolypath')
+for(i in 1:length(package_list)){
+	installpackages(package_list[i])
+	library(package_list[i],character.only=T)}
+```
+
+### To edit in run_vcfcleanup.sh
 * run='diagnostic'
 Will only make the plots
 * run='filter_all'
@@ -54,6 +83,10 @@ Will produce a vcf file once all filters are passed
 * run='filter_sequential'
 Will produce a vcf file at each filtering stage (not usually useful)
 
+Three examples of run_vcfcleanup.sh scripts are given\
+The example 1: we do not know which thresholds to use and we let the script automatically set it up to 90% quantile\
+The example 2: we want to see what thresholds are suggested but we know the values we want to filter on\
+The example 3: we know the values we want to filter on\
 
 ## 2. Filters on annotations in the vcf file
 The general marker INFO fields (FS, SOR, MQ...) and the sample level annotations that were analysed by plotting their distribution of values in the dataset and/or used for filtering are indicated in bold in the lists 2.1 and 2.2. Other annotations (DP, AC, AF) are indicated for reference.
@@ -167,20 +200,18 @@ A run with run='diagnostic' will plot histograms and empirical cumulative distri
 #run_vcf_cleanup.sh
 
 #vcf filter (only done once to prepare list SNP positions)
-
-# modules #####################################################
-#module load system/R-3.5.1
-#module load bioinfo/bcftools-1.6
-#module load bioinfo/tabix-0.2.5
-#module load bioinfo/vcftools-0.1.15
-#module load bioinfo/samtools-1.8
-# end modules #################################################
-
 # parameters ##################################################
-username=avignal
+username="avignal"
 SCRIPTS='~/seqapipopOnHAV3_1/vcf_cleanup_scripts' #path to scripts
 DIRIN='~/combineGVCFs/The870vcf' #path to directory containing the input vcf
 DIROUT='~/seqapipopOnHAV3_1/vcf_cleanup' #path to output directory
+# end parameters ###############################################
+
+# prep modules and R libraries
+mkdir -p ${DIROUT}/log
+${SCRIPTS}/param.sh ${DIROUT} ${SCRIPTS}
+
+# values ##################################################
 VCFIN='MetaGenotypesCalled870_raw_snps.vcf.gz' #inputvcf before filters
 limit_allele=3
 limit_FS=61
@@ -200,7 +231,7 @@ kept_above_threshold="MQ_QUAL_QD~GQ~GQ"
 kept_below_threshold="FS_SOR_allele~miss_het~GQfiltered"
 type='haploid'
 run='diagnostic'
-# end parameters ###############################################
+# end values ###############################################
 sbatch -W -J vcf_diag -o ${DIROUT}/log/vcf_cleanup.o -e ${DIROUT}/log/vcf_cleanup.e \
 		--wrap="${SCRIPTS}/vcf_cleanup.sh ${username} ${SCRIPTS} ${DIRIN} ${DIROUT} ${VCFIN} \
 		${limit_allele} ${limit_FS} ${limit_SOR} ${limit_MQ} ${limit_MQRankSum} ${limit_ReadPosRankSum} \
@@ -336,20 +367,18 @@ Running the following script with run='filter_all', will perform the filtering a
 #run_vcf_cleanup.sh
 
 #vcf filter (only done once to prepare list SNP positions)
-
-# modules #####################################################
-#module load system/R-3.5.1
-#module load bioinfo/bcftools-1.6
-#module load bioinfo/tabix-0.2.5
-#module load bioinfo/vcftools-0.1.15
-#module load bioinfo/samtools-1.8
-# end modules #################################################
-
 # parameters ##################################################
 username=avignal #Deprecated
 SCRIPTS='~/seqapipopOnHAV3_1/vcf_cleanup_scripts' #path to scripts
 DIRIN='~/combineGVCFs/The870vcf' #path to directory containing the input vcf
 DIROUT='~/seqapipopOnHAV3_1/vcf_cleanup' #path to output directory
+# end parameters ##############################################
+
+# prep modules and R libraries
+mkdir -p ${DIROUT}/log
+${SCRIPTS}/param.sh ${DIROUT} ${SCRIPTS}
+
+# values ##################################################
 VCFIN='MetaGenotypesCalled870_raw_snps.vcf.gz' #inputvcf before filters
 limit_allele=3
 limit_FS=61
@@ -369,7 +398,7 @@ kept_above_threshold="MQ_QUAL_QD~GQ~GQ"
 kept_below_threshold="FS_SOR_allele~miss_het~GQfiltered"
 type='haploid'
 run='filter_all'
-# end parameters ##############################################
+# end values ##############################################
 sbatch -W -J vcf_filter -o ${DIROUT}/log/vcf_cleanup.o -e ${DIROUT}/log/vcf_cleanup.e \
 		--wrap="${SCRIPTS}/vcf_cleanup.sh ${username} ${SCRIPTS} ${DIRIN} ${DIROUT} ${VCFIN} \
 		${limit_allele} ${limit_FS} ${limit_SOR} ${limit_MQ} ${limit_MQRankSum} ${limit_ReadPosRankSum} \
