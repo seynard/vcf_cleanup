@@ -14,7 +14,6 @@ type="haploid"
 ########################################################################################################## 
 
 mkdir -p ${DIROUT}/log
-${SCRIPTS}/param.sh ${DIROUT} ${SCRIPTS}
 
 ########################################################################################################## 
 # OPTION 1, no idea on how to select thresholds, automatic choice of values 

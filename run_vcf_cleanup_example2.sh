@@ -14,7 +14,6 @@ type="haploid"
 ########################################################################################################## 
 
 mkdir -p ${DIROUT}/log
-${SCRIPTS}/param.sh ${DIROUT} ${SCRIPTS}
 
 ########################################################################################################## 
 # OPTION 2, we want to see what are the suggested values for filter threshold but we know the values we want to filter for 
