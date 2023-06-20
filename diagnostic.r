@@ -1,7 +1,5 @@
-#module load system/R-3.5.1
 #R
 ######## functions ######## 
-installpackages<-function(package_name){if(package_name %in% rownames(installed.packages()) == FALSE) {install.packages(package_name, repos = "http://cran.us.r-project.org")}}
 ecdf_fun<-function(x,perc) ecdf(x)(perc)
 ###########################  
 ######## parameters ######## 
@@ -15,9 +13,7 @@ kept_below_threshold<-args[6]
 args_below=args[7]
 ###########################  
 package_list<-c('data.table','ggplot2','reshape2','viridis')
-for(i in 1:length(package_list)){
-	installpackages(package_list[i])
-	library(package_list[i],character.only=T)}
+for(i in 1:length(package_list)){library(package_list[i],character.only=T)}
 	
 ABOVE<-data.frame(filt=unlist(strsplit(kept_above_threshold,'_')),Filt=unlist(strsplit(args_above,'_')),info='above')
 BELOW<-data.frame(filt=unlist(strsplit(kept_below_threshold,'_')),Filt=unlist(strsplit(args_below,'_')),info='below')
