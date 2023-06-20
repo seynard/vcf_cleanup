@@ -206,7 +206,7 @@ else
 				bcftools index ${DIRIN}/${VCFIN}
 				bcftools view -R ${DIROUT}/heterozygous_keep.txt ${DIRIN}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf
 #				vcftools --vcf ${DIRIN}/vcf_new.vcf  --positions ${DIROUT}/heterozygous_keep.txt --recode --recode-INFO-all --out ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
-				bcftools -Ov query -f '%CHROM %POS' ${DIROUT}/heterozygous_keep.txt > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
+				bcftools query -f '%CHROM %POS' ${DIROUT}/heterozygous_keep.txt > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
 				cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_het}		
 			fi
 		fi
@@ -238,7 +238,7 @@ else
 			bcftools index ${DIRIN}/vcf_new.vcf
 			bcftools view -R ${DIROUT}/gq_keep.txt ${DIRIN}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf
 #			vcftools --vcf ${DIRIN}/vcf_new.vcf --positions ${DIROUT}/gq_keep.txt --recode --recode-INFO-all --out ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
-			bcftools -Ov query -f '%CHROM %POS' ${DIROUT}/gq_keep.txt > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
+			bcftools query -f '%CHROM %POS' ${DIROUT}/gq_keep.txt > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
 			cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_gq}		
 		fi
 		
@@ -364,7 +364,7 @@ else
 		bcftools index ${DIRIN}/${VCFIN}
 		bcftools view -R ${DIROUT}/list_kept.txt ${DIRIN}/${VCFIN} > ${DIROUT}/${vcf}
 #		vcftools --gzvcf ${DIRIN}/${VCFIN} --positions ${DIROUT}/list_kept.txt --recode --recode-INFO-all --out ${DIROUT}/${vcf}
-		bcftools -Ov query -f '%CHROM %POS' ${DIROUT}/list_kept.txt ${DIROUT}/${vcf}
+		bcftools query -f '%CHROM %POS' ${DIROUT}/list_kept.txt ${DIROUT}/${vcf}
 		mv ${DIROUT}/${vcf}.recode.vcf ${DIROUT}/${vcf}
 		if [ "${type}" == "haploid" ]	
 			then
