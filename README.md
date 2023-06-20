@@ -44,18 +44,15 @@ git clone --branch vcf_cleanup_v2 https://github.com/seynard/vcf_cleanup.git
 The scripts will work on a slurm cluster. In theory, the first step will be to install necessary modules and R packages. If you experience any issue with this step please install the required packages ('data.table','reshape2','RColorBrewer','grDevices','ggplot2','viridis','venn','grid','ggpolypath') before running the script.
 
 
-The first step of the script will be to install dependencies, programs and R libraries. 
+The first step will be to install dependencies, programs and R libraries prior to running the script. For that run in the console: (the module information are stored in param.sh)
 ```bash
-#! /bin/bash
 #param.sh
 ##### Load all necessary modules ####
-DIROUT=${1} #definied in the run script
-SCRIPTS=${2} #definied in the run script
 module load statistics/R/4.2.2
 module load bioinfo/Bcftools/1.9
 module load bioinfo/samtools/1.14
 module load devel/python/Python-3.7.9
-Rscript ${SCRIPTS}/lib.r
+Rscript script/lib.r
 ```
 
 ```bash
@@ -74,6 +71,8 @@ for(i in 1:length(package_list)){
 	installpackages(package_list[i])
 	library(package_list[i],character.only=T)}
 ```
+
+If you have not used R on your machien before please start it one time, do install.packages('car') (to install one random package) in order to make sure that you have a repository in which the R libraries can be written. If you do not do that you might end up having an error message looking like this 'Warning in install.packages():‘lib = “/tools/statistics/R/4.2.2/lib64/R/library”’ is not writable'
 
 ### To edit in run_vcfcleanup.sh
 * run='diagnostic'
