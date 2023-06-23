@@ -120,8 +120,8 @@ else
 	if [ ${limit_FS} = -999 ]; then limit_FS=$(more ${DIROUT}/FS_value.txt); fi
 	if [ ${limit_SOR} = -999 ]; then limit_SOR=$(more ${DIROUT}/SOR_value.txt); fi
 	if [ ${limit_MQ} = -999 ]; then limit_MQ=$(more ${DIROUT}/MQ_value.txt); fi
-	if [ ${limit_MQRankSum} = -999 ]; then limit_MQRankSum=$(more ${DIROUT}/MQRankSum_value.txt); fi
-	if [ ${limit_ReadPosRankSum} = -999 ]; then limit_ReadPosRankSum=$(more ${DIROUT}/ReadPosRankSum_value.txt); fi
+	if [ ${limit_MQRankSum} = -999 ]; then limit_MQRankSum=-12.5; fi
+	if [ ${limit_ReadPosRankSum} = -999 ]; then limit_ReadPosRankSum=-8; fi
 	if [ ${limit_QUAL} = -999 ]; then limit_QUAL=$(more ${DIROUT}/QUAL_value.txt); fi
 	if [ ${limit_QD} = -999 ]; then limit_QD=$(more ${DIROUT}/QD_value.txt); fi
 	if [ ${limit_GQ} = -999 ]; then limit_GQ=$(more ${DIROUT}/GQ_value.txt); fi
@@ -134,11 +134,19 @@ else
 	### option 1 group by group
 	if [ "${run}" == "filter_sequential" ]
 	then
+		if [ -f ${DIROUT}/info.txt ]
+		then 
+			echo 'input files info already exist'
+		else 
+			bcftools query -f '%CHROM %POS %REF %ALT %FS %SOR %MQ %MQRankSum %ReadPosRankSum %QUAL %QD\n' ${DIRIN}/${VCFIN} > ${DIROUT}/info.txt
+			head='CHROM POS REF ALT FS SOR MQ MQRankSum ReadPosRankSum QUAL QD\n'
+			sed -i "1s/^/${head}/"  ${DIROUT}/info.txt
+		fi
 		if [ -f ${DIROUT}/snp_kept_nb_allele.txt ]
 		then 
 			echo 'snp kept files already exist'
 		else 
-			sbatch -W --wrap="Rscript ${SCRIPTS}/filter_list.r ${DIROUT} allele ${limit_allele}"
+			sbatch -W -J filter_seq_allele -o ${DIROUT}/log/filter_seq_allele.o -e ${DIROUT}/log/filter_seq_allele.e --wrap="Rscript ${SCRIPTS}/filter_list.r ${DIROUT} allele ${limit_allele}"
 		fi		
 		#list markers pass filters
 		kept_above_threshold="$(sed s/~/_/g <<<$kept_above_threshold)"
@@ -150,70 +158,91 @@ else
 		for j in "${array[@]}"; do v="limit_${j}"; args_below+=${!v}; args_below+='_'; done
 		filters_id=="${kept_above_threshold} ${kept_below_threshold}"
 		echo ${filters_id}
-		cp ${DIRIN}/${VCFIN} ${DIROUT}/vcf_new.vcf
-		
+		vcf_new=${DIROUT}/vcf_new.vcf.gz
+		cp ${DIRIN}/${VCFIN} ${vcf_new}
+		bcftools index ${vcf_new}
+
 		if [[ ${filters_id}  == *"FS"* ]]
 		then
 			#filter on FS
-			bcftools view -i 'FS<'${limit_FS}'' ${DIROUT}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf	
-			cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_fs}
-		fi		
+			bcftools view -i 'FS<'${limit_FS}'' ${vcf_new} -Oz -o ${DIROUT}/${vcf_fs}.gz
+			bcftools index ${DIROUT}/${vcf_fs}.gz 
+			cp ${DIROUT}/${vcf_fs}.gz ${vcf_new}
+			bcftools index ${vcf_new}
+		fi	
+
 		if [[ ${filters_id}  == *"SOR"* ]]
 		then
 			#filter on SOR
-			bcftools view -i 'SOR<'${limit_SOR}'' ${DIROUT}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf	
-			cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_sor}
+			bcftools view -i 'SOR<'${limit_SOR}'' ${vcf_new} -Oz -o ${DIROUT}/${vcf_sor}.gz
+			bcftools index ${DIROUT}/${vcf_sor}.gz
+			cp ${DIROUT}/${vcf_sor}.gz ${vcf_new}
+			bcftools index ${vcf_new}
 		fi		
+
 		if [[ ${filters_id}  == *"MQ"* ]]
 		then
 			#filter on MQ
-			bcftools view -i 'MQ>'${limit_MQ}'' ${DIROUT}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf	
-			cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_mq}
+			bcftools view -i 'MQ>'${limit_MQ}'' ${vcf_new} -Oz -o ${DIROUT}/${vcf_mq}.gz
+			bcftools index ${DIROUT}/${vcf_mq}.gz
+			cp ${DIROUT}/${vcf_mq}.gz ${vcf_new}
+			bcftools index ${vcf_new}
 		fi
+
 		if [[ ${filters_id}  == *"QUAL"* ]]
 		then
 			#filter on QUAL 
-			bcftools view -i 'QUAL>'${limit_QUAL}'' ${DIROUT}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf	
-			cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_qual}		
+			bcftools view -i 'QUAL>'${limit_QUAL}'' ${vcf_new} -Oz -o ${DIROUT}/${vcf_qual}.gz
+			bcftools index ${DIROUT}/${vcf_qual}.gz 
+			cp ${DIROUT}/${vcf_qual}.gz ${vcf_new}
+			bcftools index ${vcf_new}
 		fi
+
 		if [[ ${filters_id}  == *"QD"* ]]
 		then
 			#filter on QD
-			bcftools view -i 'QD>'${limit_QD}'' ${DIROUT}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf	
-			cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_qd}		
+			bcftools view -i 'QD>'${limit_QD}'' ${vcf_new} -Oz -o ${DIROUT}/${vcf_qd}.gz	
+			bcftools index ${DIROUT}/${vcf_qd}.gz 
+			cp ${DIROUT}/${vcf_qd}.gz ${vcf_new}
+			bcftools index ${vcf_new}
 		fi
+
 		if [[ ${filters_id}  == *"allele"* ]]
 		then
 			#filter on number of alleles
-			awk '!/*/{print $0}' ${DIROUT}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf	
-			bcftools view --max-alleles ${limit_allele} ${DIROUT}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf	
-			cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_multi}		
+			zcat ${vcf_new} | awk '!/*/{print $0}' > ${DIROUT}/tmp.vcf
+			bcftools view --max-alleles ${limit_allele} ${DIROUT}/tmp.vcf -Oz -o ${DIROUT}/${vcf_multi}.gz	
+			bcftools index ${DIROUT}/${vcf_multi}.gz 
+			cp ${DIROUT}/${vcf_multi}.gz ${vcf_new}
+			bcftools index ${vcf_new}
 		fi
+
 		if [[ ${filters_id}  == *"miss"* ]]
 		then
 			#filter on missing
-			bcftools view -i 'F_MISSING<'${limit_miss}'' ${DIROUT}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf
-			cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_miss}		
+			bcftools view -i 'F_MISSING<'${limit_miss}'' ${vcf_new} -Oz -o ${DIROUT}/${vcf_miss}.gz		
+			bcftools index ${DIROUT}/${vcf_miss}.gz 	
+			cp ${DIROUT}/${vcf_miss}.gz ${vcf_new}
+			bcftools index ${vcf_new}
 		fi
+
 		if [[ ${filters_id}  == *"het"* ]]
 		then		
 			#filter on heterozygous
 			if [ "${type}" == "haploid" ]	
 				then
-				bcftools +missing2ref ${DIROUT}/vcf_new.vcf  -- -m > ${DIROUT}/tmp.vcf
-				bcftools +setGT ${DIROUT}/tmp.vcf -- -t q -i 'GT="het"' -n "./." > ${DIROUT}/tmp2.vcf
-				bcftools view -i 'F_MISSING<'${limit_het}'' ${DIROUT}/tmp2.vcf | bcftools query -f '%CHROM %POS \n' > ${DIROUT}/heterozygous_keep.txt
-				bcftools index ${DIRIN}/${VCFIN}
-				bcftools view -R ${DIROUT}/heterozygous_keep.txt ${DIRIN}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf
-#				vcftools --vcf ${DIRIN}/vcf_new.vcf  --positions ${DIROUT}/heterozygous_keep.txt --recode --recode-INFO-all --out ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
-				bcftools query -f '%CHROM %POS' ${DIROUT}/heterozygous_keep.txt > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
-				cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_het}		
+				bcftools +missing2ref ${vcf_new} -- -m | bcftools +setGT -- -t q -i 'GT="het"' -n "./." | bcftools view -i 'F_MISSING<'${limit_het}'' | bcftools query -f '%CHROM\t%POS\n' > ${DIROUT}/heterozygous_keep.txt
+				bcftools view -R ${DIROUT}/heterozygous_keep.txt ${vcf_new} -Oz -o ${DIROUT}/${vcf_het}.gz	
+				bcftools index ${DIROUT}/${vcf_het}.gz 	
+				cp ${DIROUT}/${vcf_het}.gz ${vcf_new}
+				bcftools index ${vcf_new}
 			fi
 		fi
+
 		if [[ ${filters_id}  == *"GQfiltered"* ]]
 		then		
 			#filter on GQ 
-			bcftools query -f '%CHROM %POS [ %GQ]\n' ${DIROUT}/vcf_new.vcf > ${DIROUT}/tmp.txt
+			bcftools query -f '%CHROM %POS [ %GQ]\n' ${vcf_new} > ${DIROUT}/tmp.txt
 			ncol=$(awk '{print NF;exit}' ${DIROUT}/tmp.txt)
 			nind=$(($ncol-2))
 			threshold=$( bc -l <<<"${limit_GQfiltered}*${nind}" )
@@ -230,58 +259,47 @@ else
 					x=$(grep -o -w ${j} <<< "${line[@]}" | wc -l)
 					n_gq_filt=$((n_gq_filt+x))
 				done
-				if [[ ${n_gq_filt} -lt ${threshold} ]]
+				if [[ ${n_gq_filt} -le ${threshold} ]]
 				then
-					sed -n "${i}p" ${DIROUT}/tmp.txt | awk '{print $1" "$2}' >> ${DIROUT}/gq_keep.txt
+					sed -n "${i}p" ${DIROUT}/tmp.txt | awk '{print $1"\t"$2}' >> ${DIROUT}/gq_keep.txt
 				fi
 			done
-			bcftools index ${DIRIN}/vcf_new.vcf
-			bcftools view -R ${DIROUT}/gq_keep.txt ${DIRIN}/vcf_new.vcf > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/vcf_new.vcf
-#			vcftools --vcf ${DIRIN}/vcf_new.vcf --positions ${DIROUT}/gq_keep.txt --recode --recode-INFO-all --out ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
-			bcftools query -f '%CHROM %POS' ${DIROUT}/gq_keep.txt > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/vcf_new.vcf
-			cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf_gq}		
+			bcftools view -R ${DIROUT}/gq_keep.txt ${vcf_new} -Oz -o ${DIROUT}/${vcf_gq}.gz
+			bcftools index ${DIROUT}/${vcf_gq}.gz 	
+			cp ${DIROUT}/${vcf_gq}.gz ${vcf_new}
+			bcftools index ${vcf_new}
 		fi
-		
+
 		#final
-		cp ${DIROUT}/vcf_new.vcf ${DIROUT}/${vcf}
+		cp ${vcf_new} ${DIROUT}/${vcf}
 		if [ "${type}" == "haploid" ]	
 			then
-			bcftools +setGT ${DIROUT}/${vcf} -- -t q -i 'GT="het"' -n "./." > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/${vcf}
+			bcftools +setGT ${DIROUT}/${vcf} -- -t q -i 'GT="het"' -n "./." | bcftools view -Oz -o ${DIROUT}/${vcf}.gz
+			bcftools index ${DIROUT}/${vcf}.gz 	
 		fi
-		rm ${DIROUT}/tmp.vcf.recode.vcf ${DIROUT}/tmp2.vcf.recode.vcf ${DIROUT}/tmp.vcf.log ${DIROUT}/tmp ${DIROUT}/tmp.vcf ${DIROUT}/tmp2.vcf ${DIROUT}/heterozygous_keep.txt ${DIROUT}/gq_keep.txt
+
 		#Counting SNPs on the chromosomes in the various vcf files
 		zgrep -v '#' ${DIRIN}/${VCFIN} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfInitial
-		grep -v '#' ${DIROUT}/${vcf_fs} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_fs
-		grep -v '#' ${DIROUT}/${vcf_sor} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_sor
-		grep -v '#' ${DIROUT}/${vcf_mq} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_mq
-		grep -v '#' ${DIROUT}/${vcf_qual} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_qual
-		grep -v '#' ${DIROUT}/${vcf_qd} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_qd
-		grep -v '#' ${DIROUT}/${vcf_multi} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_multi
-		grep -v '#' ${DIROUT}/${vcf_miss} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_miss
-		grep -v '#' ${DIROUT}/${vcf_het} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_het
-		grep -v '#' ${DIROUT}/${vcf_gq} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPsFinal_GqProportion
-		grep -v '#' ${DIROUT}/${vcf} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPsFinal
+		zgrep -v '#' ${DIROUT}/${vcf_fs}.gz | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_fs
+		zgrep -v '#' ${DIROUT}/${vcf_sor}.gz | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_sor
+		zgrep -v '#' ${DIROUT}/${vcf_mq}.gz | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_mq
+		zgrep -v '#' ${DIROUT}/${vcf_qual}.gz | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_qual
+		zgrep -v '#' ${DIROUT}/${vcf_qd}.gz | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_qd
+		zgrep -v '#' ${DIROUT}/${vcf_multi}.gz | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_multi
+		zgrep -v '#' ${DIROUT}/${vcf_miss}.gz | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_miss
+		zgrep -v '#' ${DIROUT}/${vcf_het}.gz | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPs_het
+		zgrep -v '#' ${DIROUT}/${vcf_gq}.gz | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPsFinal_GqProportion
+		zgrep -v '#' ${DIROUT}/${vcf}.gz | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPsFinal
+		bcftools query -f '%CHROM %POS [ %GT]\n' ${DIROUT}/${VCFIN} > ${DIROUT}/geno.txt
 		sbatch -W -J count_phased_geno -o ${DIROUT}/log/count_phased_geno.o -e ${DIROUT}/log/count_phased_geno.e --wrap="python ${SCRIPTS}/count_phased_geno.py ${DIROUT} geno.txt"
 		mv ${DIROUT}/count_phased_geno.txt ${DIROUT}/count_phased_geno_initial.txt
-		bcftools query -f '%CHROM %POS [ %GT]\n' ${DIROUT}/${vcf} > ${DIROUT}/geno2.txt
+		bcftools query -f '%CHROM %POS [ %GT]\n' ${DIROUT}/${vcf}.gz > ${DIROUT}/geno2.txt
 		sbatch -W -J count_phased_geno -o ${DIROUT}/log/count_phased_geno.o -e ${DIROUT}/log/count_phased_geno.e --wrap="python ${SCRIPTS}/count_phased_geno.py ${DIROUT} geno2.txt"
 		mv ${DIROUT}/count_phased_geno.txt ${DIROUT}/count_phased_geno_final.txt
 		
-		bcftools query -f '%CHROM %POS %REF %ALT %FS %SOR %MQ %MQRankSum %ReadPosRankSum %QUAL %QD\n' ${DIROUT}/${vcf} > ${DIROUT}/info_filter.txt
+		bcftools query -f '%CHROM %POS %REF %ALT %FS %SOR %MQ %MQRankSum %ReadPosRankSum %QUAL %QD\n' ${DIROUT}/${vcf}.gz > ${DIROUT}/info_filter.txt
 		head='CHROM POS REF ALT FS SOR MQ MQRankSum ReadPosRankSum QUAL QD\n'
 		sed -i "1s/^/${head}/"  ${DIROUT}/info_filter.txt
-
-		#Compressing vcfs
-		bgzip -c ${DIROUT}/${vcf} > ${DIROUT}/${vcf}.gz
-		bgzip -c ${DIROUT}/${vcf_fs} > ${DIROUT}/${vcf_fs}.gz
-		bgzip -c ${DIROUT}/${vcf_sor} > ${DIROUT}/${vcf_sor}.gz
-		bgzip -c ${DIROUT}/${vcf_mq} > ${DIROUT}/${vcf_mq}.gz
-		bgzip -c ${DIROUT}/${vcf_qual} > ${DIROUT}/${vcf_qual}.gz
-		bgzip -c ${DIROUT}/${vcf_qd} > ${DIROUT}/${vcf_qd}.gz
-		bgzip -c ${DIROUT}/${vcf_multi} > ${DIROUT}/${vcf_multi}.gz
-		bgzip -c ${DIROUT}/${vcf_miss} > ${DIROUT}/${vcf_miss}.gz
-		bgzip -c ${DIROUT}/${vcf_het} > ${DIROUT}/${vcf_het}.gz
-		bgzip -c ${DIROUT}/${vcf_gq} > ${DIROUT}/${vcf_gq}.gz
 
 	#### option 2 all filter at once
 	elif [ "${run}" == "filter_all" ]
@@ -298,7 +316,7 @@ else
 		then 
 			echo 'snp kept files already exist'
 		else 
-			sbatch -W --wrap="Rscript ${SCRIPTS}/filter_list.r ${DIROUT} allele ${limit_allele}"
+			sbatch -W -J filter_all_allele -o ${DIROUT}/log/filter_all_allele.o -e ${DIROUT}/log/filter_all_allele.e --wrap="Rscript ${SCRIPTS}/filter_list.r ${DIROUT} allele ${limit_allele}"
 		fi
 
 		if [ -f ${DIROUT}/missing.txt ]
@@ -321,7 +339,7 @@ else
 				for file in ${DIROUT}/geno_*; do mv "$file" "${file}.gt"; done
 			fi
 			limit=${limit_miss}_${limit_het}
-			sbatch -W --mem=100G -W --wrap="Rscript ${SCRIPTS}/filter_list.r ${DIROUT} miss_het ${limit}"
+			sbatch -W -J filter_all_misss_het -o ${DIROUT}/log/filter_all_misss_het.o -e ${DIROUT}/log/filter_all_misss_het.e --mem=100G -W --wrap="Rscript ${SCRIPTS}/filter_list.r ${DIROUT} miss_het ${limit}"
 		fi									
 		if [ -f ${DIROUT}/GQfiltered.txt ]
 		then 
@@ -343,7 +361,7 @@ else
 				for file in ${DIROUT}/gq_*; do mv "$file" "${file}.gq"; done
 			fi
 			limit=${limit_GQ}_${limit_GQfiltered}
-			sbatch -W --mem=100G -W --wrap="Rscript ${SCRIPTS}/filter_list.r ${DIROUT} GQ_GQfiltered ${limit}"
+			sbatch -W -J filter_all_gq -o ${DIROUT}/log/filter_all_gq.o -e ${DIROUT}/log/filter_all_gq.e --mem=100G -W --wrap="Rscript ${SCRIPTS}/filter_list.r ${DIROUT} GQ_GQfiltered ${limit}"
 		fi							
 			
 		#list markers pass filters
@@ -363,31 +381,35 @@ else
 		#filter
 		bcftools index ${DIRIN}/${VCFIN}
 		bcftools view -R ${DIROUT}/list_kept.txt ${DIRIN}/${VCFIN} > ${DIROUT}/${vcf}
-#		vcftools --gzvcf ${DIRIN}/${VCFIN} --positions ${DIROUT}/list_kept.txt --recode --recode-INFO-all --out ${DIROUT}/${vcf}
-		bcftools query -f '%CHROM %POS' ${DIROUT}/list_kept.txt ${DIROUT}/${vcf}
-		mv ${DIROUT}/${vcf}.recode.vcf ${DIROUT}/${vcf}
 		if [ "${type}" == "haploid" ]	
 			then
-			bcftools +setGT ${DIROUT}/${vcf} -- -t q -i 'GT="het"' -n "./." > ${DIROUT}/tmp.vcf && mv ${DIROUT}/tmp.vcf ${DIROUT}/${vcf}
+			bcftools +setGT ${DIROUT}/${vcf} -- -t q -i 'GT="het"' -n "./." | bcftools view -Oz -o ${DIROUT}/${vcf}.gz
 		fi
 
 		#Counting SNPs on the chromosomes in the various vcf files
 		zgrep -v '#' ${DIRIN}/${VCFIN} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfInitial
-		grep -v '#' ${DIROUT}/${vcf} | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPsFinal
+		zgrep -v '#' ${DIROUT}/${vcf}.gz | cut -f 1 | sort | uniq -c | awk 'BEGIN {OFS="\t";sum=0}{print $2, $1; sum += $1} END {print "Sum", sum}' > ${DIROUT}/countVcfAllFilteredSNPsFinal
 		sbatch -W -J count_phased_geno -o ${DIROUT}/log/count_phased_geno.o -e ${DIROUT}/log/count_phased_geno.e --wrap="python ${SCRIPTS}/count_phased_geno.py ${DIROUT} geno.txt"
 		mv ${DIROUT}/count_phased_geno.txt ${DIROUT}/count_phased_geno_initial.txt
-		bcftools query -f '%CHROM %POS [ %GT]\n' ${DIROUT}/${vcf} > ${DIROUT}/geno2.txt
+		bcftools query -f '%CHROM %POS [ %GT]\n' ${DIROUT}/${vcf}.gz > ${DIROUT}/geno2.txt
 		sbatch -W -J count_phased_geno -o ${DIROUT}/log/count_phased_geno.o -e ${DIROUT}/log/count_phased_geno.e --wrap="python ${SCRIPTS}/count_phased_geno.py ${DIROUT} geno2.txt"
 		mv ${DIROUT}/count_phased_geno.txt ${DIROUT}/count_phased_geno_final.txt
 
-		bcftools query -f '%CHROM %POS %REF %ALT %FS %SOR %MQ %MQRankSum %ReadPosRankSum %QUAL %QD\n' ${DIROUT}/${vcf} > ${DIROUT}/info_filter.txt
+		bcftools query -f '%CHROM %POS %REF %ALT %FS %SOR %MQ %MQRankSum %ReadPosRankSum %QUAL %QD\n' ${DIROUT}/${vcf}.gz > ${DIROUT}/info_filter.txt
 		head='CHROM POS REF ALT FS SOR MQ MQRankSum ReadPosRankSum QUAL QD\n'
 		sed -i "1s/^/${head}/"  ${DIROUT}/info_filter.txt
-
-		#Compressing vcfs
-		bgzip -c ${DIROUT}/${vcf} > ${DIROUT}/${vcf}.gz
-
 	fi
 fi
+
+
+
+
+
+
+
+
+
+
+
 
 
