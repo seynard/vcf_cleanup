@@ -72,7 +72,7 @@ for(i in 1:length(package_list)){
 	library(package_list[i],character.only=T)}
 ```
 
-If you have not used R on your machien before please start it one time, do install.packages('car') (to install one random package) in order to make sure that you have a repository in which the R libraries can be written. If you do not do that you might end up having an error message looking like this 'Warning in install.packages():‘lib = “/tools/statistics/R/4.2.2/lib64/R/library”’ is not writable'
+If you have not used R on your machine before please start it one time, do install.packages('car') (to install one random package) in order to make sure that you have a repository in which the R libraries can be written. If you do not do that you might end up having an error message looking like this 'Warning in install.packages():‘lib = “/tools/statistics/R/4.2.2/lib64/R/library”’ is not writable'
 
 ### To edit in run_vcfcleanup.sh
 * run='diagnostic'
