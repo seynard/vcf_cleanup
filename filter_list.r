@@ -14,19 +14,21 @@ print(filter_info)
 option=paste0(filter_info$filt,collapse='_')
 
 if (filt=='allele'){
-		allele_star<-info[grepl('\\*',info$ALT),c('CHROM','POS')]
-		quadri<-subset(info[,c('CHROM','POS')],nchar(info$ALT)>Filt & grepl('\\*',info$ALT)==F)
-		tri<-subset(info[,c('CHROM','POS')],nchar(info$ALT)==Filt & grepl('\\*',info$ALT)==F)
-		bi<-subset(info[,c('CHROM','POS')],nchar(info$ALT)==1 & grepl('\\*',info$ALT)==F)
-		snp_kept<-rbind(bi,tri)
-		snp_not_kept<-rbind(allele_star,quadri)
-		write.table(snp_kept,sep='\t',paste0(dir,'/snp_kept_nb_allele.txt'),col.names=F,row.names=F,quote=F)
-		write.table(snp_not_kept,sep='\t',paste0(dir,'/snp_not_kept_nb_allele.txt'),col.names=F,row.names=F,quote=F)
-	}
+	info<-fread(paste0(dir,'/info.txt'))
+	allele_star<-info[grepl('\\*',info$ALT),c('CHROM','POS')]
+	quadri<-subset(info[,c('CHROM','POS')],nchar(info$ALT)>filter_info$Filt[filter_info$filt==filt] & grepl('\\*',info$ALT)==F)
+	tri<-subset(info[,c('CHROM','POS')],nchar(info$ALT)==filter_info$Filt[filter_info$filt==filt] & grepl('\\*',info$ALT)==F)
+	bi<-subset(info[,c('CHROM','POS')],nchar(info$ALT)==1 & grepl('\\*',info$ALT)==F)
+	snp_kept<-rbind(bi,tri)
+	snp_not_kept<-rbind(allele_star,quadri)
+	write.table(snp_kept,sep='\t',paste0(dir,'/snp_kept_nb_allele.txt'),col.names=F,row.names=F,quote=F)
+	write.table(snp_not_kept,sep='\t',paste0(dir,'/snp_not_kept_nb_allele.txt'),col.names=F,row.names=F,quote=F)
+}
 
 if ('miss' %in% filter_info$filt & 'het' %in% filter_info$filt){
 	gt_list<-list.files(path=dir,pattern='.gt')
 	het<-c('0/1','0|1','0/2','0|2','0/3','0|3','1/2','1|2','1/3','1|3','2/3','2|3')
+	ms<-c('./.','.|.')
 	m<-list()
 	h<-list()
 	for(i in 1:length(gt_list)){
@@ -34,7 +36,7 @@ if ('miss' %in% filter_info$filt & 'het' %in% filter_info$filt){
 		gt<-fread(paste0(dir,'/',gt_list[i]),data.table=F,header=F)
 		colnames(gt)[1]<-'CHROM'
 		colnames(gt)[2]<-'POS'
-		m[[i]]<-data.frame(gt$CHROM,gt$POS,rowSums(gt%in%c('./.','.|.'))/(ncol(gt)-2))
+		m[[i]]<-data.frame(gt$CHROM,gt$POS,rowSums(sapply(gt,`%in%`,ms))/(ncol(gt)-2))
 		h[[i]]<-data.frame(gt$CHROM,gt$POS,rowSums(sapply(gt,`%in%`,het))/(ncol(gt)-2))
 		}
 	d_miss<-do.call(rbind,m)
