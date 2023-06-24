@@ -34,6 +34,7 @@ In order to avoid having to manage packages and their versions we created a cond
 [On hard filtering variants](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants)
 
 Variants were filtered on the INFO field and on samples-level annotations of the vcf. Additionally, we removed the SNP markers having an allele noted *, as observed for indels (InDel), that cannot be managed easily in subsequent analyses.
+It is better to remove 'indels' prior to running the script as otherwise you might keep variants linked to indels (e.g CATTT as reference and C as alternative alleles). 
 
 To download this version of the package, use the following command
 ```bash
