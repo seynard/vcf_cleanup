@@ -1,6 +1,8 @@
 # Filter vcf file
 
-<span style="color:red;">**LATEST RELEASED VERSION IS V2. CHECK THE CORRECT BRANCH**</span>
+``diff
+**LATEST RELEASED VERSION IS V2. CHECK THE CORRECT BRANCH**
+``````
 
 Histoiry of the pipeline: written in 2018 by S Eynard, updated by A Vignal in 2019. Version 0 finalised by S Eynard and A Vignal in 2021, and used for SeqApiPop. Version 1, update of version 0, addition 
 of an option to take the data type (haploid or diploid) into account when doing filtering as it impacts the filtering done on heterozygotes sites. Also small update on the plotting function.
