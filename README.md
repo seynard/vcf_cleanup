@@ -50,7 +50,7 @@ The first step will be to install dependencies, programs and R libraries prior t
 #param.sh
 ##### Load all necessary modules ####
 module load statistics/R/4.2.2
-module load bioinfo/Bcftools/1.9
+module load bioinfo/Bcftools/1.17
 module load bioinfo/samtools/1.14
 module load devel/python/Python-3.7.9
 Rscript script/lib.r
